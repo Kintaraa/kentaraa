@@ -1,5 +1,10 @@
 {
   "canisters": {
+    "internet_identity": {
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did"
+    },
     "kintaraa_backend": {
       "candid": "src/kintaraa_backend/kintaraa_backend.did",
       "package": "kintaraa_backend",
@@ -7,7 +12,8 @@
     },
     "kintaraa_frontend": {
       "dependencies": [
-        "kintaraa_backend"
+        "kintaraa_backend",
+        "internet_identity"
       ],
       "frontend": {
         "entrypoint": "src/kintaraa_frontend/index.html"
@@ -18,10 +24,10 @@
       "type": "assets"
     }
   },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
     }
   },
   "version": 1

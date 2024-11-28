@@ -1,6 +1,7 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory as backendIDL } from "../../../declarations/kintaraa_backend/kintaraa_backend.did.js";
 import { getCanisterId } from "../config/canister_env";
+import { AuthClient } from "@dfinity/auth-client";
 
 const agent = new HttpAgent({
   host: process.env.DFX_NETWORK === "ic" ? "https://ic0.app" : "http://127.0.0.1:4943",
@@ -21,7 +22,18 @@ export const backendActor = Actor.createActor(backendIDL, {
   canisterId,
 });
 
+export const getAuthClient = async () => {
+  const client = await AuthClient.create({
+    idleOptions: {
+      disableIdle: true,
+    },
+  });
+  return client;
+};
+
+
 export const api = {
+
   // Reports
   submitReport: async (description) => {
     try {

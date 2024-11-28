@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -10,6 +12,7 @@ import Resources from './pages/Resources';
 import GetStarted from './pages/GetStarted';
 import AdminDashboard from './pages/admin/Dashboard';
 import TokenManagement from './components/TokenManagement';
+import Login from './pages/Login';
 import LegalSupport from './pages/services/LegalSupport';
 import MedicalCare from './pages/services/MedicalCare';
 import Counseling from './pages/services/Counseling';
@@ -17,51 +20,93 @@ import PoliceServices from './pages/services/PoliceServices';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <Routes>
-          {/* Home Route */}
-          <Route path="/" element={
-            <>
-              <Hero />
-              <Features />
-              <Support />
-            </>
-          } />
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={
+              <>
+                <Hero />
+                <Features />
+                <Support />
+              </>
+            } />
+            <Route path="/login" element={<Login />} />
 
-          {/* Main Navigation Routes */}
-          <Route path="/report" element={<Report />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/resources" element={<Resources />} />
-          
-          {/* Service Routes */}
-          <Route path="/support/legal" element={<LegalSupport />} />
-          <Route path="/support/medical" element={<MedicalCare />} />
-          <Route path="/support/counseling" element={<Counseling />} />
-          <Route path="/support/police" element={<PoliceServices />} />
+            {/* Protected Routes */}
+            <Route path="/report" element={
+              <ProtectedRoute>
+                <Report />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/support" element={
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
+            } />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/providers/:id" element={<AdminDashboard />} />
-          <Route path="/admin/providers/new" element={<AdminDashboard />} />
+            {/* Service Routes */}
+            <Route path="/support/legal" element={
+              <ProtectedRoute>
+                <LegalSupport />
+              </ProtectedRoute>
+            } />
+            <Route path="/support/medical" element={
+              <ProtectedRoute>
+                <MedicalCare />
+              </ProtectedRoute>
+            } />
+            <Route path="/support/counseling" element={
+              <ProtectedRoute>
+                <Counseling />
+              </ProtectedRoute>
+            } />
+            <Route path="/support/police" element={
+              <ProtectedRoute>
+                <PoliceServices />
+              </ProtectedRoute>
+            } />
 
-          {/* User Management Routes */}
-          <Route path="/get-started" element={<GetStarted />} />
-          <Route path="/tokens" element={<TokenManagement />} />
-          
-          {/* Community Sub-routes */}
-          <Route path="/community/forum/:id" element={<Community />} />
-          <Route path="/community/events" element={<Community />} />
-          <Route path="/community/groups" element={<Community />} />
-          
-          {/* Resource Sub-routes */}
-          <Route path="/resources/:id" element={<Resources />} />
-          <Route path="/resources/category/:category" element={<Resources />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Community Routes */}
+            <Route path="/community/*" element={
+              <ProtectedRoute>
+                <Community />
+              </ProtectedRoute>
+            } />
+
+            {/* Resources Routes */}
+            <Route path="/resources/*" element={
+              <ProtectedRoute>
+                <Resources />
+              </ProtectedRoute>
+            } />
+
+            {/* User Management Routes */}
+            <Route path="/get-started" element={
+              <ProtectedRoute>
+                <GetStarted />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/tokens" element={
+              <ProtectedRoute>
+                <TokenManagement />
+              </ProtectedRoute>
+            } />
+
+            {/* Admin Routes */}
+            <Route path="/admin/*" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

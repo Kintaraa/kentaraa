@@ -1,103 +1,180 @@
-use candid::CandidType;
+use candid::{CandidType, Principal};
 use ic_cdk::{query, update};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use candid::Principal;
 
 #[derive(CandidType, Serialize, Deserialize, Clone)]
-struct Report {
+pub struct ServiceRequest {
     id: u64,
-    reporter: Principal,
-    timestamp: u64,
+    user: Principal,
+    service_type: ServiceType,
     description: String,
-    status: ReportStatus,
+    status: RequestStatus,
+    timestamp: u64,
+    priority: Priority,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone)]
-enum ReportStatus {
-    Submitted,
-    UnderReview,
+pub enum ServiceType {
+    Legal,
+    Medical,
+    Counseling,
+    Police,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub enum RequestStatus {
+    Pending,
     InProgress,
-    Resolved,
+    Completed,
+    Cancelled,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone)]
-struct User {
-    principal: Principal,
-    token_balance: u64,
-    reports: Vec<u64>,
+pub enum Priority {
+    Emergency,
+    High,
+    Medium,
+    Low,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub struct Appointment {
+    id: u64,
+    user: Principal,
+    service_type: ServiceType,
+    datetime: u64,
+    status: AppointmentStatus,
+    notes: String,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub enum AppointmentStatus {
+    Scheduled,
+    Confirmed,
+    Completed,
+    Cancelled,
 }
 
 thread_local! {
-    static REPORTS: std::cell::RefCell<HashMap<u64, Report>> = std::cell::RefCell::new(HashMap::new());
-    static USERS: std::cell::RefCell<HashMap<Principal, User>> = std::cell::RefCell::new(HashMap::new());
-    static REPORT_ID_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
+    static SERVICE_REQUESTS: std::cell::RefCell<HashMap<u64, ServiceRequest>> = std::cell::RefCell::new(HashMap::new());
+    static APPOINTMENTS: std::cell::RefCell<HashMap<u64, Appointment>> = std::cell::RefCell::new(HashMap::new());
+    static REQUEST_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
+    static APPOINTMENT_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
 }
 
+// Service Request Functions
 #[update]
-fn submit_report(description: String) -> u64 {
+fn submit_service_request(service_type: ServiceType, description: String, priority: Priority) -> u64 {
     let caller = ic_cdk::caller();
-    let report_id = REPORT_ID_COUNTER.with(|counter| {
+    let request_id = REQUEST_COUNTER.with(|counter| {
         let current = *counter.borrow();
         *counter.borrow_mut() = current + 1;
         current
     });
 
-    let report = Report {
-        id: report_id,
-        reporter: caller,
-        timestamp: ic_cdk::api::time(),
+    let request = ServiceRequest {
+        id: request_id,
+        user: caller,
+        service_type,
         description,
-        status: ReportStatus::Submitted,
+        status: RequestStatus::Pending,
+        timestamp: ic_cdk::api::time(),
+        priority,
     };
 
-    REPORTS.with(|reports| {
-        reports.borrow_mut().insert(report_id, report);
+    SERVICE_REQUESTS.with(|requests| {
+        requests.borrow_mut().insert(request_id, request);
     });
 
-    USERS.with(|users| {
-        let mut users = users.borrow_mut();
-        users.entry(caller)
-            .and_modify(|user| user.reports.push(report_id))
-            .or_insert_with(|| User {
-                principal: caller,
-                token_balance: 100, // Initial token balance
-                reports: vec![report_id],
-            });
-    });
-
-    report_id
+    request_id
 }
 
 #[query]
-fn get_report(id: u64) -> Option<Report> {
-    REPORTS.with(|reports| reports.borrow().get(&id).cloned())
-}
-
-#[query]
-fn get_user_reports(user: Principal) -> Vec<Report> {
-    USERS.with(|users| {
-        if let Some(user) = users.borrow().get(&user) {
-            return REPORTS.with(|reports| {
-                let reports = reports.borrow();
-                user.reports
-                    .iter()
-                    .filter_map(|id| reports.get(id))
-                    .cloned()
-                    .collect()
-            });
-        }
-        Vec::new()
+fn get_service_request(id: u64) -> Option<ServiceRequest> {
+    SERVICE_REQUESTS.with(|requests| {
+        requests.borrow().get(&id).cloned()
     })
 }
 
 #[query]
-fn get_token_balance(user: Principal) -> u64 {
-    USERS.with(|users| {
-        users.borrow()
-            .get(&user)
-            .map(|user| user.token_balance)
-            .unwrap_or(0)
+fn get_user_service_requests(user: Principal) -> Vec<ServiceRequest> {
+    SERVICE_REQUESTS.with(|requests| {
+        requests
+            .borrow()
+            .values()
+            .filter(|request| request.user == user)
+            .cloned()
+            .collect()
+    })
+}
+
+// Appointment Functions
+#[update]
+fn schedule_appointment(service_type: ServiceType, datetime: u64, notes: String) -> u64 {
+    let caller = ic_cdk::caller();
+    let appointment_id = APPOINTMENT_COUNTER.with(|counter| {
+        let current = *counter.borrow();
+        *counter.borrow_mut() = current + 1;
+        current
+    });
+
+    let appointment = Appointment {
+        id: appointment_id,
+        user: caller,
+        service_type,
+        datetime,
+        status: AppointmentStatus::Scheduled,
+        notes,
+    };
+
+    APPOINTMENTS.with(|appointments| {
+        appointments.borrow_mut().insert(appointment_id, appointment);
+    });
+
+    appointment_id
+}
+
+#[query]
+fn get_appointment(id: u64) -> Option<Appointment> {
+    APPOINTMENTS.with(|appointments| {
+        appointments.borrow().get(&id).cloned()
+    })
+}
+
+#[query]
+fn get_user_appointments(user: Principal) -> Vec<Appointment> {
+    APPOINTMENTS.with(|appointments| {
+        appointments
+            .borrow()
+            .values()
+            .filter(|appointment| appointment.user == user)
+            .cloned()
+            .collect()
+    })
+}
+
+#[update]
+fn update_appointment_status(id: u64, status: AppointmentStatus) -> bool {
+    APPOINTMENTS.with(|appointments| {
+        if let Some(appointment) = appointments.borrow_mut().get_mut(&id) {
+            appointment.status = status;
+            true
+        } else {
+            false
+        }
+    })
+}
+
+#[update]
+fn update_request_status(id: u64, status: RequestStatus) -> bool {
+    SERVICE_REQUESTS.with(|requests| {
+        if let Some(request) = requests.borrow_mut().get_mut(&id) {
+            request.status = status;
+            true
+        } else {
+            false
+        }
     })
 }
 

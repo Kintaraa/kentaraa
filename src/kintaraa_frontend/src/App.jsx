@@ -1,30 +1,14 @@
-import { useState } from 'react';
-import { kintaraa_backend } from 'declarations/kintaraa_backend';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import TestConnection from './components/TestConnection';
 
 function App() {
-  const [greeting, setGreeting] = useState('');
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    kintaraa_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
-
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <TestConnection />
+      </div>
+    </Router>
   );
 }
 

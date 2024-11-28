@@ -1,18 +1,15 @@
 {
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
-  },
   "name": "kintaraa",
-  "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "prebuild": "npm run prebuild --workspaces --if-present",
-    "pretest": "npm run prebuild --workspaces --if-present",
-    "start": "npm start --workspaces --if-present",
-    "test": "npm test --workspaces --if-present"
-  },
-  "type": "module",
+  "version": "0.0.0",
+  "private": true,
   "workspaces": [
     "src/kintaraa_frontend"
-  ]
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=src/kintaraa_frontend",
+    "prebuild": "npm run prebuild --workspace=src/kintaraa_frontend"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
 }

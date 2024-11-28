@@ -1,1 +1,1 @@
-# kentaraa
+# kintaraa

@@ -10,6 +10,6 @@
     "prebuild": "npm run prebuild --workspace=src/kintaraa_frontend"
   },
   "devDependencies": {
-    "vite": "^4.0.0"
+    "vite": "^4.5.5"
   }
 }

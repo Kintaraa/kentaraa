@@ -1,27 +1,21 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AuthClient } from '@dfinity/auth-client';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/'; 
+  const from = location.state?.from?.pathname || '/';
 
   const handleLogin = async () => {
     try {
-      const authClient = await AuthClient.create();
-      await authClient.login({
-        onSuccess: () => {
-          const identity = authClient.getIdentity();
-          window.localStorage.setItem('identity', JSON.stringify(identity));
-          navigate(from, { replace: true });
-        },
-        onError: (error) => {
-          console.error('Login failed:', error);
-        },
-      });
+      const success = await login();
+      if (success) {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
-      console.error('Failed to initialize AuthClient:', error);
+      console.error('Login failed:', error);
     }
   };
 
@@ -42,17 +36,17 @@ const Login = () => {
           onClick={handleLogin}
           className="w-full bg-purple-600 text-white py-3 px-6 rounded-full hover:bg-purple-700 transition flex items-center justify-center space-x-2"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
+          <svg 
+            className="w-5 h-5" 
+            fill="none" 
+            stroke="currentColor" 
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
             />
           </svg>
           <span>Login with Internet Identity</span>

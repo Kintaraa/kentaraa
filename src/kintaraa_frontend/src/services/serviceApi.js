@@ -1,10 +1,10 @@
-import { api } from './api';
+import { backendActor } from './api';
 
 export const ServiceType = {
-  Legal: 'Legal',
-  Medical: 'Medical',
-  Counseling: 'Counseling',
-  Police: 'Police'
+  Legal: { Legal: null },
+  Medical: { Medical: null },
+  Counseling: { Counseling: null },
+  Police: { Police: null }
 };
 
 export const Priority = {
@@ -15,23 +15,10 @@ export const Priority = {
 };
 
 export const serviceApi = {
-  // Service Requests
-  submitServiceRequest: async (serviceType, description, priority) => {
-    try {
-      return await api.backendActor.submit_service_request({
-        service_type: serviceType,
-        description,
-        priority
-      });
-    } catch (error) {
-      console.error('Error submitting service request:', error);
-      throw error;
-    }
-  },
 
   getServiceRequest: async (id) => {
     try {
-      return await api.backendActor.get_service_request(id);
+      return await backendActor.get_service_request(id);
     } catch (error) {
       console.error('Error getting service request:', error);
       throw error;
@@ -40,7 +27,7 @@ export const serviceApi = {
 
   getUserServiceRequests: async (principal) => {
     try {
-      return await api.backendActor.get_user_service_requests(principal);
+      return await backendActor.get_user_service_requests(principal);
     } catch (error) {
       console.error('Error getting user service requests:', error);
       throw error;
@@ -50,7 +37,7 @@ export const serviceApi = {
   // Appointments
   scheduleAppointment: async (serviceType, datetime, notes) => {
     try {
-      return await api.backendActor.schedule_appointment({
+      return await backendActor.schedule_appointment({
         service_type: serviceType,
         datetime,
         notes
@@ -63,7 +50,7 @@ export const serviceApi = {
 
   getAppointment: async (id) => {
     try {
-      return await api.backendActor.get_appointment(id);
+      return await backendActor.get_appointment(id);
     } catch (error) {
       console.error('Error getting appointment:', error);
       throw error;
@@ -72,7 +59,7 @@ export const serviceApi = {
 
   getUserAppointments: async (principal) => {
     try {
-      return await api.backendActor.get_user_appointments(principal);
+      return await backendActor.get_user_appointments(principal);
     } catch (error) {
       console.error('Error getting user appointments:', error);
       throw error;
@@ -81,7 +68,7 @@ export const serviceApi = {
 
   updateAppointmentStatus: async (id, status) => {
     try {
-      return await api.backendActor.update_appointment_status({
+      return await backendActor.update_appointment_status({
         id,
         status
       });
@@ -93,12 +80,47 @@ export const serviceApi = {
 
   updateRequestStatus: async (id, status) => {
     try {
-      return await api.backendActor.update_request_status({
+      return await backendActor.update_request_status({
         id,
         status
       });
     } catch (error) {
       console.error('Error updating request status:', error);
+      throw error;
+    }
+
+  }
+  ,
+
+  ServiceType: {
+    Legal: 'legal',
+    Medical: 'medical', 
+    Counseling: 'counseling',
+    Police: 'police'
+  },
+
+  getServiceStats: async (serviceType) => {
+    try {
+      return await backendActor.get_service_stats({ [serviceType]: null });
+    } catch (error) {
+      console.error('Error getting service stats:', error);
+      throw error;
+    }
+  },
+
+  getAllProviders: async () => {
+    try {
+      return await backendActor.get_all_providers();
+    } catch (error) {
+      console.error('Error getting all providers:', error);
+      throw error; 
+    }
+  },
+  addProvider: async (providerData) => {
+    try {
+      return await backendActor.add_provider(providerData);
+    } catch (error) {
+      console.error('Error adding provider:', error);
       throw error;
     }
   }

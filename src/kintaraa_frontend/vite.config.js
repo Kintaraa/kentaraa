@@ -66,6 +66,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: 'esnext',
+      chunkSizeWarningLimit: 1000,
       commonjsOptions: {
         transformMixedEsModules: true,
       }

@@ -165,19 +165,17 @@ fn record_transaction(user: Principal, amount: i64, description: String, service
 
 // Reward functions
 #[update]
-async fn reward_daily_engagement() -> Result<u64, String> {
+pub async fn reward_daily_engagement() -> Result<u64, String> {
     earn_tokens(DAILY_ENGAGEMENT_REWARD, "Daily engagement reward".to_string()).await
 }
 
 #[update]
-async fn reward_report_submission() -> Result<u64, String> {
+pub async fn reward_report_submission() -> Result<u64, String> {
     earn_tokens(REPORT_SUBMISSION_REWARD, "Report submission reward".to_string()).await
 }
 
 #[update]
-async fn reward_community_post() -> Result<u64, String> {
+pub async fn reward_community_post() -> Result<u64, String> {
     earn_tokens(COMMUNITY_POST_REWARD, "Community post reward".to_string()).await
 }
 
-// Required for candid interface generation
-ic_cdk::export_candid!();

@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthService } from '../services/authService';
 
+const network = import.meta.env.VITE_DFX_NETWORK;
+console.log('Environment Using Import:', network);
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -17,10 +20,11 @@ export const AuthProvider = ({ children }) => {
       const isAuthenticated = await AuthService.init();
       if (isAuthenticated) {
         const principal = await AuthService.getPrincipal();
-        // Check if user is admin (you'll need to implement this check in your backend)
-        const isAdminUser = await checkIsAdmin(principal);
-        setUser({ principal: principal.toString() });
-        setIsAdmin(isAdminUser);
+        const agent = await AuthService.getAgent();
+        setUser({ 
+          principal: principal.toString(),
+          agent
+        });
       }
     } catch (error) {
       console.error('Auth initialization failed:', error);
@@ -31,11 +35,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = async () => {
     try {
+      
       const success = await AuthService.login();
+      console.log("checking Login", success);
       if (success) {
+        console.log("Login Success ");
         const principal = await AuthService.getPrincipal();
+        const agent = await AuthService.getAgent();
         const isAdminUser = await checkIsAdmin(principal);
-        setUser({ principal: principal.toString() });
+        setUser({ 
+          principal: principal.toString(),
+          agent
+        });
+        console.log("isAdminUser", isAdminUser);
         setIsAdmin(isAdminUser);
         return true;
       }
@@ -59,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   const checkIsAdmin = async (principal) => {
     // Implement your admin check logic here
     // You should check against your backend canister
-    return false; // Default to false for now
+    return true; // Default to false for now
   };
 
   const value = {

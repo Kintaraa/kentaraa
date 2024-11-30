@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
 
+
+
 const Report = () => {
   const [formData, setFormData] = useState({
     description: '',
     location: '',
     date: '',
-    type: 'incident'
+    type: 'legal'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -18,14 +20,15 @@ const Report = () => {
     setError(null);
 
     try {
-      await api.submitReport(formData.description);
+      const request = {
+        service_type: formData.type.charAt(0).toUpperCase() + formData.type.slice(1),
+        description: formData.description,
+        priority: "Medium"
+      };
+
+     await api.submitServiceRequest(request);
+      
       setSuccess(true);
-      setFormData({
-        description: '',
-        location: '',
-        date: '',
-        type: 'incident'
-      });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -67,10 +70,10 @@ const Report = () => {
               onChange={handleChange}
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
             >
-              <option value="incident">Incident Report</option>
-              <option value="harassment">Harassment</option>
-              <option value="violence">Violence</option>
-              <option value="other">Other</option>
+              <option value="legal">Legal</option>
+              <option value="medical">Medical</option>
+              <option value="counseling">Counseling</option>
+              <option value="police">Police</option>
             </select>
           </div>
 

@@ -1,3 +1,20 @@
+type ServiceType = variant { Legal; Medical; Counseling; Police };
+type Priority = variant { Emergency; High; Medium; Low };
+type RequestStatus = variant { Pending; InProgress; Completed; Cancelled };
+type AppointmentStatus = variant { Scheduled; Confirmed; Completed; Cancelled };
+type ServiceStats = record { total_requests: nat64; active_requests: nat64; available_providers: nat64 };
+
+
 service : {
     "greet": (text) -> (text) query;
+
+    "submit_service_request": (record { service_type: ServiceType; description: text; priority: Priority }) -> (variant { Ok: nat64; Err: text });
+    "get_service_requests": () -> (vec record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }) query;
+    "get_service_request": (nat64) -> (variant { Ok: record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }; Err: text }) query;
+    "get_user_service_requests": (principal) -> (vec record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }) query;
+    "get_appointment": (nat64) -> (variant { Ok: record { id: nat64; user: principal; service_type: ServiceType; datetime: nat64; status: AppointmentStatus; notes: text }; Err: text }) query;
+    "get_user_appointments": (principal) -> (vec record { id: nat64; user: principal; service_type: ServiceType; datetime: nat64; status: AppointmentStatus; notes: text }) query;
+    "get_service_stats": (ServiceType) -> (ServiceStats) query;
+    "get_all_providers": () -> (vec record { id: principal; name: text; service_type: ServiceType; is_available: bool; current_load: nat64; total_cases: nat64; rating: float64 }) query;
+    "add_provider": (record { name: text; service_type: ServiceType }) -> (variant { Ok: null; Err: text });
 }

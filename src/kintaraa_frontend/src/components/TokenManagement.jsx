@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { serviceApi } from '../services/serviceApi';
+import { api } from '../services/api';
+import { AuthService } from '../services/authService';
 
 const TokenManagement = () => {
   const [balance, setBalance] = useState(null);
@@ -12,11 +13,18 @@ const TokenManagement = () => {
 
   const loadTokenData = async () => {
     try {
+      if (!AuthService.isAuthenticated()) {
+        throw new Error('User not authenticated');
+      }
+      
+      const principal = await AuthService.getPrincipal();
       const [balanceData, txHistory] = await Promise.all([
-        serviceApi.getTokenBalance(),
-        serviceApi.getTransactionHistory()
+        api.getTokenBalance(principal),
+        api.getTransactionHistory(principal)
       ]);
-      setBalance(balanceData);
+      console.log("====balanceData====: ", balanceData.Ok);
+      console.log("====txHistory====: ", txHistory);
+      setBalance(balanceData.Ok);
       setTransactions(txHistory);
     } catch (error) {
       console.error('Error loading token data:', error);
@@ -26,7 +34,13 @@ const TokenManagement = () => {
   };
 
   const formatTimestamp = (timestamp) => {
-    return new Date(Number(timestamp)).toLocaleString();
+    if (!timestamp) return '-';
+    const milliseconds = Number(timestamp) / 1_000_000;
+    return new Date(milliseconds).toLocaleString();
+  };
+
+  const formatBigInt = (value) => {
+    return value ? Number(value).toString() : '0';
   };
 
   if (loading) {
@@ -44,11 +58,12 @@ const TokenManagement = () => {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-lg opacity-90">Available Balance</h3>
-            <p className="text-3xl font-bold">{balance?.balance || 0} KINT</p>
+            <p className="text-3xl font-bold">{formatBigInt(balance?.balance)} KINT</p>
+            <p className="text-sm opacity-70">Last Updated: {formatTimestamp(balance?.last_updated)}</p>
           </div>
           <div className="text-right">
-            <p className="opacity-90">Total Earned: {balance?.total_earned || 0}</p>
-            <p className="opacity-90">Total Spent: {balance?.total_spent || 0}</p>
+            <p className="opacity-90">Total Earned: {formatBigInt(balance?.total_earned)}</p>
+            <p className="opacity-90">Total Spent: {formatBigInt(balance?.total_spent)}</p>
           </div>
         </div>
       </div>
@@ -95,7 +110,7 @@ const TokenManagement = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {transactions.map((tx) => (
-                <tr key={tx.id}>
+                <tr key={Number(tx.id)}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatTimestamp(tx.timestamp)}
                   </td>
@@ -103,12 +118,12 @@ const TokenManagement = () => {
                     {tx.description}
                   </td>
                   <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                    tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                    Number(tx.amount) > 0 ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {tx.amount > 0 ? '+' : ''}{tx.amount} KINT
+                    {Number(tx.amount) > 0 ? '+' : ''}{formatBigInt(tx.amount)} KINT
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.service_type || '-'}
+                    {Array.isArray(tx.service_type) && tx.service_type.length > 0 ? tx.service_type.join(', ') : '-'}
                   </td>
                 </tr>
               ))}

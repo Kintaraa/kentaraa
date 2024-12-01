@@ -1,9 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../services/api';
+import { AuthService } from '../services/authService';
 
 const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAdminUser] = useState(true); // Replace with actual admin check
+  const [tokenBalance, setTokenBalance] = useState(null);
+  const userMenuRef = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+      setIsUserMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadTokenBalance = async () => {
+      try {
+        if (!AuthService.isAuthenticated()) return;
+        
+        const principal = await AuthService.getPrincipal();
+        const balanceResult = await api.getTokenBalance(principal);
+        
+        if (balanceResult.Ok) {
+          setTokenBalance(balanceResult.Ok.balance);
+        }
+      } catch (error) {
+        console.error('Error loading token balance:', error);
+      }
+    };
+
+    loadTokenBalance();
+    // Set up an interval to refresh the balance periodically
+    const intervalId = setInterval(loadTokenBalance, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="container mx-auto px-6 py-4">
@@ -41,10 +81,12 @@ const Navbar = () => {
 
         <div className="flex items-center space-x-6">
           <Link to="/tokens" className="token-glow px-4 py-2 rounded-full bg-white/80 flex items-center">
-            <span className="text-purple-600 font-semibold">500 KINT</span>
+            <span className="text-purple-600 font-semibold">
+              {tokenBalance !== null ? `${tokenBalance} KINT` : '0 KINT'}
+            </span>
           </Link>
           
-          <div className="relative">
+          <div className="relative" ref={userMenuRef}>
             <button 
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition"

@@ -3,12 +3,25 @@ type Priority = variant { Emergency; High; Medium; Low };
 type RequestStatus = variant { Pending; InProgress; Completed; Cancelled };
 type AppointmentStatus = variant { Scheduled; Confirmed; Completed; Cancelled };
 type ServiceStats = record { total_requests: nat64; active_requests: nat64; available_providers: nat64 };
+type TokenBalance = record {
+    balance: nat64;
+    last_updated: nat64;
+    total_earned: nat64;
+    total_spent: nat64;
+};
 
+type TokenTransaction = record {
+    id: nat64;
+    user: principal;
+    amount: int64;  // Changed from i64 to int64 for Candid compatibility
+    description: text;
+    timestamp: nat64;
+    service_type: opt text;
+};
 
 service : {
     "greet": (text) -> (text) query;
-
-    "submit_service_request": (record { service_type: ServiceType; description: text; priority: Priority }) -> (variant { Ok: nat64; Err: text });
+    "submit_report": (record { service_type: ServiceType; description: text; priority: Priority }) -> (variant { Ok: nat64; Err: text });
     "get_service_requests": () -> (vec record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }) query;
     "get_service_request": (nat64) -> (variant { Ok: record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }; Err: text }) query;
     "get_user_service_requests": (principal) -> (vec record { id: nat64; user: principal; service_type: ServiceType; description: text; status: RequestStatus; timestamp: nat64; priority: Priority }) query;
@@ -17,4 +30,27 @@ service : {
     "get_service_stats": (ServiceType) -> (ServiceStats) query;
     "get_all_providers": () -> (vec record { id: principal; name: text; service_type: ServiceType; is_available: bool; current_load: nat64; total_cases: nat64; rating: float64 }) query;
     "add_provider": (record { name: text; service_type: ServiceType }) -> (variant { Ok: null; Err: text });
+    "check_is_admin": (principal) -> (bool) query;
+    "add_admin": (principal) -> (variant { Ok: null; Err: text });
+    "initialize_user_tokens": () -> (variant { Ok: nat64; Err: text });
+    "get_token_balance": (principal) -> (variant { Ok: TokenBalance; Err: text }) query;
+    "get_transaction_history": (principal) -> (vec TokenTransaction) query;
+    "reward_daily_engagement": () -> (variant { Ok: nat64; Err: text });
+    "reward_report_submission": () -> (variant { Ok: nat64; Err: text });
+    "reward_community_post": () -> (variant { Ok: nat64; Err: text });
+    "submit_service_request": (record {
+        service_type: ServiceType;
+        description: text;
+        priority: Priority;
+        notes: text;
+        preferred_contact: text;
+        contact_details: text;
+        date_time: nat64;
+    }) -> (variant { Ok: nat64; Err: text });
+    "schedule_appointment": (record {
+        service_type: ServiceType;
+        datetime: nat64;
+        notes: text;
+        location: text;
+    }) -> (variant { Ok: nat64; Err: text });
 }

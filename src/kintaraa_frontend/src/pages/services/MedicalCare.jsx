@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { serviceApi } from '../../services/serviceApi';
 
 const MedicalCare = () => {
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [appointmentDetails, setAppointmentDetails] = useState({
+    serviceType: 'Emergency Medical Care',
+    location: 'Central Hospital',
+    date: '',
+    notes: ''
+  });
 
   const medicalServices = [
     {
@@ -45,6 +52,46 @@ const MedicalCare = () => {
       services: ["Basic Care", "Referrals", "Support"]
     }
   ];
+
+  const handleAppointmentSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validation checks
+    if (!appointmentDetails.serviceType) {
+      alert('Please select a service type.');
+      return;
+    }
+    if (!appointmentDetails.location) {
+      alert('Please select a location.');
+      return;
+    }
+    if (isNaN(new Date(appointmentDetails.date).getTime())) {
+      alert('Please enter a valid date.');
+      return;
+    }
+    if (!appointmentDetails.notes) {
+      alert('Please enter notes.');
+      return;
+    }
+
+    try {
+      const timestamp = new Date(appointmentDetails.date).getTime();
+      const formattedAppointment = {
+        datetime: timestamp,
+        location: appointmentDetails.location,
+        notes: appointmentDetails.notes,
+        service_type: appointmentDetails.serviceType
+      };
+      
+      const result = await serviceApi.scheduleAppointment(formattedAppointment);
+      console.log('Appointment Details:', result.Ok);
+      setShowAppointmentForm(false);
+      alert('Appointment scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling appointment:', error);
+      alert('Failed to schedule appointment. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,20 +205,30 @@ const MedicalCare = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Schedule Medical Appointment</h2>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleAppointmentSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Service Type</label>
-                <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                  <option>Emergency Medical Care</option>
-                  <option>Medical Examination</option>
-                  <option>Follow-up Care</option>
+                <select 
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  value={appointmentDetails.serviceType}
+                  onChange={(e) => setAppointmentDetails({ ...appointmentDetails, serviceType: e.target.value })}
+                >
+                  <option value="">Select a service</option>
+                  {medicalServices.map((service, index) => (
+                    <option key={index} value={service.title}>{service.title}</option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Preferred Location</label>
-                <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                <select 
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  value={appointmentDetails.location}
+                  onChange={(e) => setAppointmentDetails({ ...appointmentDetails, location: e.target.value })}
+                >
+                  <option value="">Select a location</option>
                   {locations.map((location, index) => (
-                    <option key={index}>{location.name}</option>
+                    <option key={index} value={location.name}>{location.name}</option>
                   ))}
                 </select>
               </div>
@@ -180,6 +237,8 @@ const MedicalCare = () => {
                 <input 
                   type="date"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                  value={appointmentDetails.date}
+                  onChange={(e) => setAppointmentDetails({ ...appointmentDetails, date: e.target.value })}
                 />
               </div>
               <div>
@@ -187,6 +246,8 @@ const MedicalCare = () => {
                 <textarea 
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
                   rows="3"
+                  value={appointmentDetails.notes}
+                  onChange={(e) => setAppointmentDetails({ ...appointmentDetails, notes: e.target.value })}
                 ></textarea>
               </div>
               <div className="flex justify-end space-x-4">

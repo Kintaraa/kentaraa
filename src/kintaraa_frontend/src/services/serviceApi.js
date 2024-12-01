@@ -1,4 +1,4 @@
-import { backendActor } from './api';
+import { getBackendActor } from './api';
 
 export const ServiceType = {
   Legal: { Legal: null },
@@ -8,49 +8,73 @@ export const ServiceType = {
 };
 
 export const Priority = {
-  Emergency: 'Emergency',
-  High: 'High',
-  Medium: 'Medium',
-  Low: 'Low'
+  Emergency: { Emergency: null },
+  High: { High: null },
+  Medium: { Medium: null },
+  Low: { Low: null }
 };
 
 export const serviceApi = {
 
   getServiceRequest: async (id) => {
     try {
-      return await backendActor.get_service_request(id);
+      const actor = await getBackendActor();
+      return await actor.get_service_request(id);
     } catch (error) {
       console.error('Error getting service request:', error);
+      throw error;
+    }
+  },
+  submitServiceRequest: async (formData) => {
+    try {
+      const actor = await getBackendActor();
+      const formattedRequest = {
+        service_type: formData.serviceType,
+        description: formData.description,
+        priority:  { [formData.priority]: null },
+        notes: formData.notes || "",
+        preferred_contact: formData.preferredContact,
+        contact_details: formData.contactDetails,
+        date_time: formData.dateTime ? BigInt(new Date(formData.dateTime).getTime()) : BigInt(0)
+      };
+      
+      return await actor.submit_service_request(formattedRequest);
+    } catch (error) {
+      console.error('Error submitting service request:', error);
       throw error;
     }
   },
 
   getUserServiceRequests: async (principal) => {
     try {
-      return await backendActor.get_user_service_requests(principal);
+      const actor = await getBackendActor();
+      return await actor.get_user_service_requests(principal);
     } catch (error) {
       console.error('Error getting user service requests:', error);
       throw error;
     }
   },
 
-  // Appointments
-  scheduleAppointment: async (serviceType, datetime, notes) => {
+  scheduleAppointment: async (appointment) => {
     try {
-      return await backendActor.schedule_appointment({
-        service_type: serviceType,
-        datetime,
-        notes
-      });
+      const actor = await getBackendActor();
+      const formattedAppointment = {
+        service_type: { Medical: null },
+        datetime: BigInt(appointment.datetime),
+        notes: appointment.notes,
+        location: appointment.location
+      };
+      return await actor.schedule_appointment(formattedAppointment);
     } catch (error) {
-      console.error('Error scheduling appointment:', error);
+      console.error("Error scheduling appointment:", error);
       throw error;
     }
   },
 
   getAppointment: async (id) => {
     try {
-      return await backendActor.get_appointment(id);
+      const actor = await getBackendActor();
+      return await actor.get_appointment(id);
     } catch (error) {
       console.error('Error getting appointment:', error);
       throw error;
@@ -59,7 +83,8 @@ export const serviceApi = {
 
   getUserAppointments: async (principal) => {
     try {
-      return await backendActor.get_user_appointments(principal);
+      const actor = await getBackendActor();
+      return await actor.get_user_appointments(principal);
     } catch (error) {
       console.error('Error getting user appointments:', error);
       throw error;
@@ -68,7 +93,8 @@ export const serviceApi = {
 
   updateAppointmentStatus: async (id, status) => {
     try {
-      return await backendActor.update_appointment_status({
+      const actor = await getBackendActor();
+      return await actor.update_appointment_status({
         id,
         status
       });
@@ -80,7 +106,8 @@ export const serviceApi = {
 
   updateRequestStatus: async (id, status) => {
     try {
-      return await backendActor.update_request_status({
+      const actor = await getBackendActor();
+      return await actor.update_request_status({
         id,
         status
       });
@@ -88,9 +115,7 @@ export const serviceApi = {
       console.error('Error updating request status:', error);
       throw error;
     }
-
-  }
-  ,
+  },
 
   ServiceType: {
     Legal: 'legal',
@@ -101,7 +126,8 @@ export const serviceApi = {
 
   getServiceStats: async (serviceType) => {
     try {
-      return await backendActor.get_service_stats({ [serviceType]: null });
+      const actor = await getBackendActor();
+      return await actor.get_service_stats({ [serviceType]: null });
     } catch (error) {
       console.error('Error getting service stats:', error);
       throw error;
@@ -110,7 +136,8 @@ export const serviceApi = {
 
   getAllProviders: async () => {
     try {
-      return await backendActor.get_all_providers();
+      const actor = await getBackendActor();
+      return await actor.get_all_providers();
     } catch (error) {
       console.error('Error getting all providers:', error);
       throw error; 
@@ -118,7 +145,8 @@ export const serviceApi = {
   },
   addProvider: async (providerData) => {
     try {
-      return await backendActor.add_provider(providerData);
+      const actor = await getBackendActor();
+      return await actor.add_provider(providerData);
     } catch (error) {
       console.error('Error adding provider:', error);
       throw error;

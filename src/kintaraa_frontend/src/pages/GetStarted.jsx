@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 
 const GetStarted = () => {
   const navigate = useNavigate();
@@ -31,12 +32,19 @@ const GetStarted = () => {
     }
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < steps.length) {
       setStep(step + 1);
     } else {
-      // Complete onboarding and navigate to dashboard
-      navigate('/dashboard');
+      try {
+        // Initialize tokens for new user
+        await api.initializeUserTokens();
+        // Navigate to dashboard after successful token initialization
+        navigate('/');
+      } catch (error) {
+        console.error('Error initializing tokens:', error);
+        // You might want to add error handling UI here
+      }
     }
   };
 

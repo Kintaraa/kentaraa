@@ -14,15 +14,19 @@ export const ProtectedRoute = ({ children }) => {
 };
 
 export const AdminRoute = ({ children }) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const location = useLocation();
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  console.log("AdminRoute - User:", user);
+  console.log("AdminRoute - IsAdmin:", isAdmin);
+  console.log("AdminRoute - Loading:", loading);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  if (!isAdmin) {
-    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  if (!user || !isAdmin) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

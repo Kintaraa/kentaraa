@@ -17,14 +17,22 @@ export const AuthProvider = ({ children }) => {
 
   const initializeAuth = async () => {
     try {
+      console.log("Starting auth initialization");
       const isAuthenticated = await AuthService.init();
+      console.log("Is authenticated:", isAuthenticated);
       if (isAuthenticated) {
         const principal = await AuthService.getPrincipal();
+        console.log("Principal:", principal.toString());
         const agent = await AuthService.getAgent();
         setUser({ 
           principal: principal.toString(),
           agent
         });
+
+        // Check if the user is an admin using AuthService
+        const isAdminUser = await AuthService.checkIsAdmin(principal);
+        console.log("Admin check result:", isAdminUser);
+        setIsAdmin(isAdminUser);
       }
     } catch (error) {
       console.error('Auth initialization failed:', error);
@@ -35,20 +43,33 @@ export const AuthProvider = ({ children }) => {
 
   const login = async () => {
     try {
-      
+      console.log("Starting login process");
       const success = await AuthService.login();
-      console.log("checking Login", success);
+      console.log("Login success:", success);
+      
       if (success) {
-        console.log("Login Success ");
         const principal = await AuthService.getPrincipal();
+        console.log("Got principal:", principal.toString());
+        
         const agent = await AuthService.getAgent();
-        const isAdminUser = await checkIsAdmin(principal);
-        setUser({ 
+        console.log("Got agent:", agent);
+        
+        const newUser = { 
           principal: principal.toString(),
           agent
-        });
-        console.log("isAdminUser", isAdminUser);
+        };
+        console.log("Setting user to:", newUser);
+        setUser(newUser);
+        
+        // Retrieve credentials and confirm if user is admin
+        const isAdminUser = await AuthService.checkIsAdmin(principal);
+        console.log("Setting isAdmin to:", isAdminUser);
         setIsAdmin(isAdminUser);
+        
+        // Verify the state was updated
+        console.log("Final user state:", newUser);
+        console.log("Final isAdmin state:", isAdminUser);
+        
         return true;
       }
       return false;
@@ -68,12 +89,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkIsAdmin = async (principal) => {
-    // Implement your admin check logic here
-    // You should check against your backend canister
-    return true; // Default to false for now
-  };
-
   const value = {
     user,
     isAdmin,
@@ -81,6 +96,9 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
   };
+  console.log("AuthProvider - User:", user);
+  console.log("AuthProvider - IsAdmin:", isAdmin);
+  console.log("AuthProvider - Loading:", loading);
 
   if (loading) {
     return (

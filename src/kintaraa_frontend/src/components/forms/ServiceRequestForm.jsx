@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { serviceApi } from '../../services/serviceApi';
 
 const ServiceRequestForm = ({ serviceType, onSuccess, onCancel }) => {
+
   const [formData, setFormData] = useState({
+    serviceType: serviceType,
     description: '',
     priority: 'Medium',
     notes: '',
@@ -18,13 +20,9 @@ const ServiceRequestForm = ({ serviceType, onSuccess, onCancel }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-
     try {
-      const requestId = await serviceApi.submitServiceRequest(
-        serviceType,
-        formData.description,
-        formData.priority
-      );
+      const response = await serviceApi.submitServiceRequest(formData);
+      const requestId = response.Ok;
       
       if (onSuccess) {
         onSuccess(requestId);
@@ -38,10 +36,17 @@ const ServiceRequestForm = ({ serviceType, onSuccess, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name === 'priority') {
+      setFormData(prev => ({
+        ...prev,
+        priority: Priority[value]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   return (
@@ -56,7 +61,7 @@ const ServiceRequestForm = ({ serviceType, onSuccess, onCancel }) => {
         <label className="block text-sm font-medium text-gray-700">Priority Level</label>
         <select
           name="priority"
-          value={formData.priority}
+          value={Object.keys(formData.priority)[0]}
           onChange={handleChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
         >

@@ -27,7 +27,20 @@ const AdminDashboard = () => {
         serviceApi.getServiceStats('Counseling'),
         serviceApi.getServiceStats('Police')
       ]);
-      setStats({ legal, medical, counseling, police });
+      
+      // Convert BigInt to Number
+      const processStats = (stats) => ({
+        total_requests: Number(stats.total_requests),
+        active_requests: Number(stats.active_requests),
+        available_providers: Number(stats.available_providers)
+      });
+
+      setStats({
+        legal: processStats(legal),
+        medical: processStats(medical),
+        counseling: processStats(counseling),
+        police: processStats(police)
+      });
     } catch (error) {
       console.error('Error loading stats:', error);
     }
@@ -100,7 +113,6 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        Service Providers List
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="px-6 py-4 border-b">
             <h2 className="text-xl font-semibold">Service Providers</h2>

@@ -66,7 +66,7 @@ pub async fn initialize_user_tokens() -> Result<u64, String> {
 
 // Get user's token balance
 #[query]
-fn get_token_balance(user: Principal) -> Result<TokenBalance, String> {
+pub fn get_token_balance(user: Principal) -> Result<TokenBalance, String> {
     TOKEN_BALANCES.with(|balances| {
         balances
             .borrow()
@@ -130,7 +130,7 @@ async fn earn_tokens(amount: u64, description: String) -> Result<u64, String> {
 
 // Get user's transaction history
 #[query]
-fn get_transaction_history(user: Principal) -> Vec<TokenTransaction> {
+pub fn get_transaction_history(user: Principal) -> Vec<TokenTransaction> {
     TOKEN_TRANSACTIONS.with(|transactions| {
         transactions
             .borrow()

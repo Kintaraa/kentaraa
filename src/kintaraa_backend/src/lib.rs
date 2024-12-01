@@ -1,21 +1,10 @@
+use crate::token_system::{TokenBalance, TokenTransaction};
 use candid::{CandidType, Principal};
 use ic_cdk::{query, update};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::token_system::{TokenBalance, TokenTransaction};
 
 mod token_system;
-
-#[derive(CandidType, Serialize, Deserialize, Clone)]
-pub struct ServiceRequest {
-    id: u64,
-    user: Principal,
-    service_type: ServiceType,
-    description: String,
-    status: RequestStatus,
-    timestamp: u64,
-    priority: Priority,
-}
 
 #[derive(CandidType, Serialize, Deserialize, Clone, PartialEq)]
 pub enum ServiceType {
@@ -53,6 +42,7 @@ pub struct Appointment {
     user: Principal,
     service_type: ServiceType,
     datetime: u64,
+    location: String,
     status: AppointmentStatus,
     notes: String,
 }
@@ -63,15 +53,6 @@ pub enum AppointmentStatus {
     Confirmed,
     Completed,
     Cancelled,
-}
-
-#[derive(CandidType, Serialize, Deserialize, Clone)]
-pub struct Report {
-    id: u64,
-    user: Principal,
-    description: String,
-    timestamp: u64,
-    status: ReportStatus,
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone)]
@@ -93,26 +74,37 @@ pub struct Provider {
 }
 
 thread_local! {
-    static SERVICE_REQUESTS: std::cell::RefCell<HashMap<u64, ServiceRequest>> = std::cell::RefCell::new(HashMap::new());
-    static APPOINTMENTS: std::cell::RefCell<HashMap<u64, Appointment>> = std::cell::RefCell::new(HashMap::new());
-    static REQUEST_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
-    static APPOINTMENT_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
-    static REPORTS: std::cell::RefCell<HashMap<u64, Report>> = std::cell::RefCell::new(HashMap::new());
-    static REPORT_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
-    static PROVIDERS: std::cell::RefCell<HashMap<Principal, Provider>> = std::cell::RefCell::new(HashMap::new());
+  static SERVICE_REQUESTS: std::cell::RefCell<HashMap<u64, ServiceRequest>> = std::cell::RefCell::new(HashMap::new());
+  static APPOINTMENTS: std::cell::RefCell<HashMap<u64, Appointment>> = std::cell::RefCell::new(HashMap::new());
+  static REQUEST_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
+  static APPOINTMENT_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
+  static REPORT_COUNTER: std::cell::RefCell<u64> = std::cell::RefCell::new(0);
+  static PROVIDERS: std::cell::RefCell<HashMap<Principal, Provider>> = std::cell::RefCell::new(HashMap::new());
+  static ADMINS: std::cell::RefCell<Vec<Principal>> = std::cell::RefCell::new(Vec::new());
+  static REPORTS: std::cell::RefCell<HashMap<u64, ReportRequest>> = std::cell::RefCell::new(HashMap::new());
+}
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub struct ReportRequest {
+    id: u64,
+    user: Principal,
+    service_type: ServiceType,
+    description: String,
+    status: RequestStatus,
+    timestamp: u64,
+    priority: Priority,
 }
 
 // Service Request Functions
 #[ic_cdk_macros::update]
-pub fn submit_service_request(request: ServiceRequestInput) -> Result<u64, String> {
+pub fn submit_report(request: SubmitReportInput) -> Result<u64, String> {
     let caller = ic_cdk::caller();
-    let request_id = REQUEST_COUNTER.with(|counter| {
+    let request_id = REPORT_COUNTER.with(|counter| {
         let current = *counter.borrow();
         *counter.borrow_mut() = current + 1;
         current
     });
 
-    let request = ServiceRequest {
+    let request = ReportRequest {
         id: request_id,
         user: caller,
         service_type: request.service_type,
@@ -122,15 +114,15 @@ pub fn submit_service_request(request: ServiceRequestInput) -> Result<u64, Strin
         priority: request.priority,
     };
 
-    SERVICE_REQUESTS.with(|requests| {
-        requests.borrow_mut().insert(request_id, request);
+    REPORTS.with(|reports| {
+        reports.borrow_mut().insert(request_id, request);
     });
 
     Ok(request_id)
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct ServiceRequestInput {
+pub struct SubmitReportInput {
     service_type: ServiceType,
     description: String,
     priority: Priority,
@@ -138,9 +130,7 @@ pub struct ServiceRequestInput {
 
 #[query]
 fn get_service_request(id: u64) -> Option<ServiceRequest> {
-    SERVICE_REQUESTS.with(|requests| {
-        requests.borrow().get(&id).cloned()
-    })
+    SERVICE_REQUESTS.with(|requests| requests.borrow().get(&id).cloned())
 }
 
 #[query]
@@ -156,8 +146,16 @@ fn get_user_service_requests(user: Principal) -> Vec<ServiceRequest> {
 }
 
 // Appointment Functions
+#[derive(CandidType, Deserialize)]
+pub struct ScheduleAppointmentInput {
+    service_type: ServiceType,
+    datetime: u64,
+    notes: String,
+    location: String,
+}
+
 #[update]
-fn schedule_appointment(service_type: ServiceType, datetime: u64, notes: String) -> u64 {
+fn schedule_appointment(input: ScheduleAppointmentInput) -> Result<u64, String> {
     let caller = ic_cdk::caller();
     let appointment_id = APPOINTMENT_COUNTER.with(|counter| {
         let current = *counter.borrow();
@@ -168,24 +166,25 @@ fn schedule_appointment(service_type: ServiceType, datetime: u64, notes: String)
     let appointment = Appointment {
         id: appointment_id,
         user: caller,
-        service_type,
-        datetime,
+        service_type: input.service_type,
+        datetime: input.datetime,
+        location: input.location,
         status: AppointmentStatus::Scheduled,
-        notes,
+        notes: input.notes,
     };
 
     APPOINTMENTS.with(|appointments| {
-        appointments.borrow_mut().insert(appointment_id, appointment);
+        appointments
+            .borrow_mut()
+            .insert(appointment_id, appointment);
     });
 
-    appointment_id
+    Ok(appointment_id)
 }
 
 #[query]
 fn get_appointment(id: u64) -> Option<Appointment> {
-    APPOINTMENTS.with(|appointments| {
-        appointments.borrow().get(&id).cloned()
-    })
+    APPOINTMENTS.with(|appointments| appointments.borrow().get(&id).cloned())
 }
 
 #[query]
@@ -224,47 +223,13 @@ fn update_request_status(id: u64, status: RequestStatus) -> bool {
     })
 }
 
-#[ic_cdk::update]
-pub async fn submit_report(description: String) -> Result<u64, String> {
-    let caller = ic_cdk::caller();
-    
-    if description.trim().is_empty() {
-        return Err("Report description cannot be empty".to_string());
-    }
-
-    let report_id = REPORT_COUNTER.with(|counter| {
-        let id = *counter.borrow();
-        *counter.borrow_mut() += 1;
-        id
-    });
-
-    let report = Report {
-        id: report_id,
-        user: caller,
-        description,
-        timestamp: ic_cdk::api::time(),
-        status: ReportStatus::Pending,
-    };
-
-    REPORTS.with(|reports| {
-        reports.borrow_mut().insert(report_id, report);
-    });
-
-    // Award tokens for submitting report
-    match token_system::reward_report_submission().await {
-        Ok(_) => Ok(report_id),
-        Err(e) => Err(format!("Report submitted but failed to award tokens: {}", e))
-    }
-}
 #[ic_cdk_macros::query]
 fn greet(name: String) -> String {
     format!("Hello, {}!", name)
 }
 #[query]
 fn get_service_requests() -> Vec<ServiceRequest> {
-    SERVICE_REQUESTS.with(|requests| {
-        requests.borrow().values().cloned().collect()
-    })
+    SERVICE_REQUESTS.with(|requests| requests.borrow().values().cloned().collect())
 }
 
 #[ic_cdk::query]
@@ -303,9 +268,7 @@ fn get_service_stats(service_type: ServiceType) -> ServiceStats {
 
 #[ic_cdk::query]
 fn get_all_providers() -> Vec<Provider> {
-    PROVIDERS.with(|providers| {
-        providers.borrow().values().cloned().collect()
-    })
+    PROVIDERS.with(|providers| providers.borrow().values().cloned().collect())
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone)]
@@ -325,14 +288,14 @@ pub struct ProviderInput {
 async fn add_provider(provider_input: ProviderInput) -> Result<(), String> {
     PROVIDERS.with(|providers| {
         let mut providers = providers.borrow_mut();
-        
+
         // Check if provider with the same name already exists
         for existing_provider in providers.values() {
             if existing_provider.name == provider_input.name {
                 return Err("Provider with this name already exists".to_string());
             }
         }
-        
+
         // Generate a new unique ID for the provider
         let provider_id = ic_cdk::api::id();
 
@@ -345,11 +308,86 @@ async fn add_provider(provider_input: ProviderInput) -> Result<(), String> {
             total_cases: 0,
             rating: 5.0,
         };
-        
+
         providers.insert(provider_id, provider);
         Ok(())
     })
 }
+#[query]
+fn check_is_admin(user: Principal) -> bool {
+    ic_cdk::println!("Checking admin status for user: {}", user.to_string());
+    ADMINS.with(|admins| {
+        let is_admin = admins.borrow().contains(&user);
+        ic_cdk::println!("Is admin result: {}", is_admin);
+        is_admin
+    })
+}
+
+#[update]
+fn add_admin(user: Principal) -> Result<(), String> {
+    // TODO: Implement proper authorization to restrict admin addition to existing admins only
+
+    ADMINS.with(|admins| {
+        admins.borrow_mut().push(user);
+    });
+
+    Ok(())
+}
+#[derive(CandidType, Deserialize)]
+pub struct ServiceRequestInput {
+    service_type: ServiceType,
+    description: String,
+    priority: Priority,
+    notes: String,
+    preferred_contact: String,
+    contact_details: String,
+    date_time: u64,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub struct ServiceRequest {
+    id: u64,
+    user: Principal,
+    service_type: ServiceType,
+    description: String,
+    priority: Priority,
+    notes: String,
+    preferred_contact: String,
+    contact_details: String,
+    date_time: u64,
+    status: RequestStatus,
+    timestamp: u64,
+}
+
+#[ic_cdk_macros::update]
+pub fn submit_service_request(request: ServiceRequestInput) -> Result<u64, String> {
+    let caller = ic_cdk::caller();
+    let request_id = REQUEST_COUNTER.with(|counter| {
+        let current = *counter.borrow();
+        *counter.borrow_mut() = current + 1;
+        current
+    });
+
+    let service_request = ServiceRequest {
+        id: request_id,
+        user: caller,
+        service_type: request.service_type,
+        description: request.description,
+        priority: request.priority,
+        notes: request.notes,
+        preferred_contact: request.preferred_contact,
+        contact_details: request.contact_details,
+        date_time: request.date_time,
+        status: RequestStatus::Pending,
+        timestamp: ic_cdk::api::time(),
+    };
+
+    SERVICE_REQUESTS.with(|requests| {
+        requests.borrow_mut().insert(request_id, service_request);
+    });
+
+    Ok(request_id)
+}
 
 // Required for candid interface generation
-ic_cdk::export_candid!(); 
+ic_cdk::export_candid!();

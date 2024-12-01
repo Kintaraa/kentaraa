@@ -26,7 +26,7 @@ const Report = () => {
         priority: "Medium"
       };
 
-     await api.submitServiceRequest(request);
+     await api.submitReport(request);
       
       setSuccess(true);
     } catch (err) {

@@ -1,5 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { HttpAgent } from '@dfinity/agent';
+import { api } from './api';
 
 const IDENTITY_PROVIDER = "https://identity.ic0.app";
 const LOCAL_II = `http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:4943/`;
@@ -43,11 +44,33 @@ export class AuthService {
           : LOCAL_II,
         onSuccess: async () => {
           this.identity = await this.client.getIdentity();
+          
+          // Cache authentication data
+          const principal = this.identity.getPrincipal().toString();
+          localStorage.setItem('auth_principal', principal);
+          localStorage.setItem('auth_identity', JSON.stringify(this.identity));
+
+          // Check if user is admin
+          const isAdmin = await AuthService.checkIsAdmin(principal);
+          localStorage.setItem('is_admin', isAdmin);
+
           resolve(true);
         },
         onError: () => resolve(false),
       });
     });
+  }
+
+  static async checkIsAdmin(principal) {
+    try {
+      console.log("Checking admin status for principal:", principal.toString());
+      const isAdmin = await api.checkIsAdmin(principal);
+      console.log("Admin check response:", isAdmin);
+      return isAdmin;
+    } catch (error) {
+      console.error("Error checking if user is admin:", error);
+      return false;
+    }
   }
 
   static async logout() {

@@ -17,6 +17,7 @@ import LegalSupport from './pages/services/LegalSupport';
 import MedicalCare from './pages/services/MedicalCare';
 import Counseling from './pages/services/Counseling';
 import PoliceServices from './pages/services/PoliceServices';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               </>
             } />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             {/* Protected Routes */}
             <Route path="/report" element={

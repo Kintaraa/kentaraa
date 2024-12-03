@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 // Form validation schema
@@ -17,20 +16,11 @@ const registerSchema = z.object({
     .max(50, 'Name must be less than 50 characters'),
   email: z.string()
     .email('Invalid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
   licenseNumber: z.string().optional(),
   organization: z.string().optional(),
   terms: z.boolean().refine(value => value === true, {
     message: "You must accept the terms and conditions"
   })
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
 }).refine(
   (data) => {
     if (data.userType !== 'survivor') {
@@ -44,11 +34,11 @@ const registerSchema = z.object({
   }
 );
 
-const RegisterPage = () => {
+const Register = () => {
   const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(null)
 
   const {
     register,
@@ -65,16 +55,18 @@ const RegisterPage = () => {
 
   const userType = watch('userType')
 
-  const onSubmit = async (data) => {
+  const handleCreateAccount = async (data) => {
+    setIsLoading(true)
+    setError(null)
+
     try {
-      setIsLoading(true)
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
       console.log('Registration data:', data)
+      setSuccess(true)
       toast.success('Registration successful!')
-      navigate('/login')
-    } catch (error) {
+      navigate(`/dashboard/${data.userType}`)
+    } catch (err) {
+      setError(err.message)
       toast.error('Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
@@ -95,8 +87,20 @@ const RegisterPage = () => {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+        {success && (
+          <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+            Registration successful! Redirecting...
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {/* Form Fields */}
+        <form onSubmit={handleSubmit(handleCreateAccount)} className="mt-8 space-y-6">
           {/* User Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -175,7 +179,7 @@ const RegisterPage = () => {
               </div>
             </>
           )}
-          
+
           {/* Terms and Conditions */}
           <div className="flex items-center">
             <input
@@ -229,4 +233,4 @@ const RegisterPage = () => {
   )
 }
 
-export default RegisterPage
+export default Register;

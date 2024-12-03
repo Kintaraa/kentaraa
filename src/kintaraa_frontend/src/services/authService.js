@@ -44,14 +44,16 @@ export class AuthService {
           : LOCAL_II,
         onSuccess: async () => {
           this.identity = await this.client.getIdentity();
-          
           // Cache authentication data
-          const principal = this.identity.getPrincipal().toString();
+          const principal = this.identity.getPrincipal();
           localStorage.setItem('auth_principal', principal);
           localStorage.setItem('auth_identity', JSON.stringify(this.identity));
+          console.log("=====Checking if user is admin=====", principal.toString())
+
 
           // Check if user is admin
           const isAdmin = await AuthService.checkIsAdmin(principal);
+          console.log("=====User is admin=====", isAdmin)
           localStorage.setItem('is_admin', isAdmin);
 
           resolve(true);
@@ -63,12 +65,12 @@ export class AuthService {
 
   static async checkIsAdmin(principal) {
     try {
-      console.log("Checking admin status for principal:", principal.toString());
+      console.log("=====Checking admin status for principal=====");
       const isAdmin = await api.checkIsAdmin(principal);
-      console.log("Admin check response:", isAdmin);
+      console.log("=====Admin check response=====", isAdmin);
       return isAdmin;
     } catch (error) {
-      console.error("Error checking if user is admin:", error);
+      console.error("Error checking if user is admin from authService:", error);
       return false;
     }
   }

@@ -1,18 +1,34 @@
-// src/components/auth/ProtectedRoute.jsx
-import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import DashboardLayout from '../../layouts/DashboardLayout'
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useAuth()
-  const location = useLocation()
 
-  if (!isAuthenticated) {
-    // Redirect to login if not authenticated
-    return <Navigate to="/login" state={{ from: location }} replace />
+export const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <DashboardLayout>{children}</DashboardLayout>
-}
+  return children;
+};
 
-export default ProtectedRoute
+export const AdminRoute = ({ children }) => {
+  const { user, isAdmin, loading } = useAuth();
+  const location = useLocation();
+
+  console.log("AdminRoute - User:", user);
+  console.log("AdminRoute - IsAdmin:", isAdmin);
+  console.log("AdminRoute - Loading:", loading);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user || !isAdmin) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};

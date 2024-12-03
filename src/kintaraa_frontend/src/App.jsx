@@ -5,8 +5,8 @@ import { AuthProvider } from './contexts/AuthContext'
 
 // Pages & Layouts
 import HomePage from './pages/HomePage'
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
+import Login from './pages/Login'
+import Register from './pages/auth/RegisterPage'
 import SurvivorDashboard from './pages/dashboard/SurvivorDashboard'
 import MedicalDashboard from './pages/dashboard/MedicalDashboard'
 import LegalDashboard from './pages/dashboard/LegalDashboard'
@@ -24,7 +24,7 @@ import SupportPage from './pages/SupportPage'
 
 // Components
 import Header from './components/common/Header'
-import ProtectedRoute from './components/auth/ProtectedRoute'
+import {ProtectedRoute, AdminRoute} from './components/ProtectedRoute'
 import EmergencyButton from './components/common/EmergencyButton'
 import Footer from './components/common/Footer'
 
@@ -62,8 +62,12 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={
+              <ProtectedRoute>
+                <Register />
+              </ProtectedRoute>
+            } />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/community" element={<CommunityPage />} />

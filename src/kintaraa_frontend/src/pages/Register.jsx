@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 // Form validation schema
@@ -17,20 +16,11 @@ const registerSchema = z.object({
     .max(50, 'Name must be less than 50 characters'),
   email: z.string()
     .email('Invalid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
   licenseNumber: z.string().optional(),
   organization: z.string().optional(),
   terms: z.boolean().refine(value => value === true, {
     message: "You must accept the terms and conditions"
   })
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
 }).refine(
   (data) => {
     if (data.userType !== 'survivor') {
@@ -46,9 +36,8 @@ const registerSchema = z.object({
 
 const Register = () => {
   const navigate = useNavigate()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState(null)
 
   const {
     register,
@@ -65,19 +54,28 @@ const Register = () => {
 
   const userType = watch('userType')
 
-  const onSubmit = async (data) => {
+
+  const handleCreateAccount = async () => {
     try {
-      setIsLoading(true)
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      console.log('Registration data:', data)
-      toast.success('Registration successful!')
-      navigate('/login')
+      const formValues = await handleSubmit((data) => {
+        setFormData(data)
+        return data
+      })()
+
+      if (formValues) {
+        setIsLoading(true)
+        // Simulate API call
+        
+        console.log('Registration data:', formValues)
+        toast.success('Registration successful!')
+        
+        // Redirect based on user type
+        navigate(`/dashboard/${formValues.userType}`)
+      }
     } catch (error) {
       toast.error('Registration failed. Please try again.')
     } finally {
-      setIsLoading(false)
+      setIsLoading(false) 
     }
   }
 
@@ -95,8 +93,8 @@ const Register = () => {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+        {/* Form Fields */}
+        <div className="mt-8 space-y-6">
           {/* User Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -176,62 +174,6 @@ const Register = () => {
             </>
           )}
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                {...register('confirmPassword')}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-
           {/* Terms and Conditions */}
           <div className="flex items-center">
             <input
@@ -252,7 +194,8 @@ const Register = () => {
 
           {/* Submit Button */}
           <button
-            type="submit"
+            type="button"
+            onClick={handleCreateAccount}
             disabled={isLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -277,9 +220,9 @@ const Register = () => {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-            ) : 'Create Account'}
+            ) : ' Account'}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   )

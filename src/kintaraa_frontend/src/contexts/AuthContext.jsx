@@ -1,120 +1,98 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthService } from '../services/authService';
+// src/contexts/AuthContext.jsx
+import { createContext, useContext, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 
-const network = import.meta.env.VITE_DFX_NETWORK;
-console.log('Environment Using Import:', network);
+const AuthContext = createContext(null)
 
-const AuthContext = createContext(null);
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(() => {
+    // Check if user info is stored in localStorage
+    const storedUser = localStorage.getItem('user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    initializeAuth();
-  }, []);
-
-  const initializeAuth = async () => {
+  const login = async (email, password, userType) => {
     try {
-      console.log("Starting auth initialization");
-      const isAuthenticated = await AuthService.init();
-      console.log("Is authenticated:", isAuthenticated);
-      if (isAuthenticated) {
-        const principal = await AuthService.getPrincipal();
-        console.log("Principal:", principal.toString());
-        const agent = await AuthService.getAgent();
-        setUser({ 
-          principal: principal.toString(),
-          agent
-        });
-
-        // Check if the user is an admin using AuthService
-        const isAdminUser = await AuthService.checkIsAdmin(principal);
-        console.log("Admin check result:", isAdminUser);
-        setIsAdmin(isAdminUser);
+      // In a real app, this would be an API call
+      const mockUser = {
+        id: '1',
+        email,
+        name: 'John Doe',
+        userType,
+        avatar: 'JD',
       }
-    } catch (error) {
-      console.error('Auth initialization failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const login = async () => {
+      // Store user info in localStorage
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(mockUser)
+      toast.success('Successfully logged in!')
+      navigate(`/dashboard/${userType}`)
+    } catch (error) {
+      toast.error('Invalid credentials')
+      throw error
+    }
+  }
+
+  const register = async (userData) => {
     try {
-      console.log("Starting login process");
-      const success = await AuthService.login();
-      console.log("Login success:", success);
-      
-      if (success) {
-        const principal = await AuthService.getPrincipal();
-        console.log("Got principal:", principal.toString());
-        
-        const agent = await AuthService.getAgent();
-        console.log("Got agent:", agent);
-        
-        const newUser = { 
-          principal: principal.toString(),
-          agent
-        };
-        console.log("Setting user to:", newUser);
-        setUser(newUser);
-        
-        // Retrieve credentials and confirm if user is admin
-        const isAdminUser = await AuthService.checkIsAdmin(principal);
-        console.log("Setting isAdmin to:", isAdminUser);
-        setIsAdmin(isAdminUser);
-        
-        // Verify the state was updated
-        console.log("Final user state:", newUser);
-        console.log("Final isAdmin state:", isAdminUser);
-        
-        return true;
+      // In a real app, this would be an API call
+      const mockUser = {
+        id: '1',
+        email: userData.email,
+        name: userData.fullName,
+        userType: userData.userType,
+        avatar: userData.fullName.split(' ').map(n => n[0]).join(''),
       }
-      return false;
-    } catch (error) {
-      console.error('Login failed:', error);
-      return false;
-    }
-  };
 
-  const logout = async () => {
-    try {
-      await AuthService.logout();
-      setUser(null);
-      setIsAdmin(false);
+      // Store user info in localStorage
+      localStorage.setItem('user', JSON.stringify(mockUser))
+      setUser(mockUser)
+      toast.success('Registration successful!')
+      navigate(`/dashboard/${userData.userType}`)
     } catch (error) {
-      console.error('Logout failed:', error);
+      toast.error('Registration failed')
+      throw error
     }
-  };
+  }
+
+  const logout = () => {
+    localStorage.removeItem('user')
+    setUser(null)
+    toast.success('Successfully logged out')
+    navigate('/login')
+  }
+
+  const updateProfile = async (updates) => {
+    try {
+      // In a real app, this would be an API call
+      const updatedUser = { ...user, ...updates }
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      setUser(updatedUser)
+      toast.success('Profile updated successfully')
+    } catch (error) {
+      toast.error('Failed to update profile')
+      throw error
+    }
+  }
 
   const value = {
     user,
-    isAdmin,
-    loading,
     login,
+    register,
     logout,
-  };
-  console.log("AuthProvider - User:", user);
-  console.log("AuthProvider - IsAdmin:", isAdmin);
-  console.log("AuthProvider - Loading:", loading);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
+    updateProfile,
+    isAuthenticated: !!user,
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}

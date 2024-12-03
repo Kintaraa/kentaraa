@@ -1,115 +1,165 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import Support from './pages/Support';
-import Report from './pages/Report';
-import Community from './pages/Community';
-import Resources from './pages/Resources';
-import GetStarted from './pages/GetStarted';
-import AdminDashboard from './pages/admin/Dashboard';
-import TokenManagement from './components/TokenManagement';
-import Login from './pages/Login';
-import LegalSupport from './pages/services/LegalSupport';
-import MedicalCare from './pages/services/MedicalCare';
-import Counseling from './pages/services/Counseling';
-import PoliceServices from './pages/services/PoliceServices';
-import Register from './pages/Register';
+// src/App.jsx
+import { Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './contexts/AuthContext'
+
+// Pages & Layouts
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import SurvivorDashboard from './pages/dashboard/SurvivorDashboard'
+import MedicalDashboard from './pages/dashboard/MedicalDashboard'
+import LegalDashboard from './pages/dashboard/LegalDashboard'
+import CounselorDashboard from './pages/dashboard/CounselorDashboard'
+import ProfileSettings from './pages/dashboard/ProfileSettings'
+import IncidentReportPage from './pages/dashboard/IncidentReportPage'
+import ResourcesPage from './pages/ResourcesPage'
+import CommunityPage from './pages/CommunityPage'
+import AboutPage from './pages/AboutPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
+import ReportPage from './pages/ReportPage'
+import SupportPage from './pages/SupportPage'
+
+
+// Components
+import Header from './components/common/Header'
+import ProtectedRoute from './components/auth/ProtectedRoute'
+import EmergencyButton from './components/common/EmergencyButton'
+import Footer from './components/common/Footer'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Navbar />
+      <div className="flex flex-col min-h-screen">
+      <Header />
+        {/* Toast Notifications */}
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 5000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              style: {
+                background: '#059669',
+              },
+            },
+            error: {
+              duration: 4000,
+              style: {
+                background: '#DC2626',
+              },
+            },
+          }}
+        />
+
+        {/* Main Content */}
+        <main className="flex-grow">
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={
-              <>
-                <Hero />
-                <Features />
-                <Support />
-              </>
-            } />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {/* Public routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/report" element={<ReportPage />} />
+            <Route path="/support" element={<SupportPage />} />
 
-            {/* Protected Routes */}
-            <Route path="/report" element={
-              <ProtectedRoute>
-                <Report />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/support" element={
-              <ProtectedRoute>
-                <Support />
-              </ProtectedRoute>
-            } />
+            {/* Protected dashboard routes */}
+            <Route path="/dashboard">
+              {/* Survivor Routes */}
+              <Route
+                path="survivor"
+                element={
+                  <ProtectedRoute>
+                    <SurvivorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="survivor/report"
+                element={
+                  <ProtectedRoute>
+                    <IncidentReportPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Service Routes */}
-            <Route path="/support/legal" element={
-              <ProtectedRoute>
-                <LegalSupport />
-              </ProtectedRoute>
-            } />
-            <Route path="/support/medical" element={
-              <ProtectedRoute>
-                <MedicalCare />
-              </ProtectedRoute>
-            } />
-            <Route path="/support/counseling" element={
-              <ProtectedRoute>
-                <Counseling />
-              </ProtectedRoute>
-            } />
-            <Route path="/support/police" element={
-              <ProtectedRoute>
-                <PoliceServices />
-              </ProtectedRoute>
-            } />
+              {/* Medical Professional Routes */}
+              <Route
+                path="medical"
+                element={
+                  <ProtectedRoute>
+                    <MedicalDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Community Routes */}
-            <Route path="/community/*" element={
-              <ProtectedRoute>
-                <Community />
-              </ProtectedRoute>
-            } />
+              {/* Legal Counsel Routes */}
+              <Route
+                path="legal"
+                element={
+                  <ProtectedRoute>
+                    <LegalDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Resources Routes */}
-            <Route path="/resources/*" element={
-              <ProtectedRoute>
-                <Resources />
-              </ProtectedRoute>
-            } />
+              {/* Counselor Routes */}
+              <Route
+                path="counselor"
+                element={
+                  <ProtectedRoute>
+                    <CounselorDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* User Management Routes */}
-            <Route path="/get-started" element={
-              <ProtectedRoute>
-                <GetStarted />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/tokens" element={
-              <ProtectedRoute>
-                <TokenManagement />
-              </ProtectedRoute>
-            } />
+              {/* Shared Dashboard Routes */}
+              <Route
+                path="profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfileSettings />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
-            {/* Admin Routes */}
-            <Route path="/admin/*" element={
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            } />
+            {/* 404 Route */}
+            <Route
+              path="*"
+              element={
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+                  <h1 className="text-4xl font-bold text-gray-900 mb-4">404 - Page Not Found</h1>
+                  <p className="text-gray-600 mb-8">The page you're looking for doesn't exist.</p>
+                  <a
+                    href="/"
+                    className="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors"
+                  >
+                    Go Home
+                  </a>
+                </div>
+              }
+            />
           </Routes>
-        </div>
-      </Router>
+        </main>
+
+        {/* Emergency Button - Always visible */}
+        <EmergencyButton />
+
+        {/* Footer */}
+        <Footer />
+      </div>
     </AuthProvider>
-  );
+  )
 }
 
-export default App;
+export default App

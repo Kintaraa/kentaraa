@@ -1,25 +1,19 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthClient } from '@dfinity/auth-client';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
-
+  const { login } = useAuth();
   const navigate = useNavigate();
- 
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
+
   const handleLogin = async () => {
     try {
-      const authClient = await AuthClient.create();
-      await authClient.login({
-        onSuccess: () => {
-          // Store identity in localStorage
-          const identity = authClient.getIdentity();
-          window.localStorage.setItem('identity', JSON.stringify(identity));
-          navigate('/register'); // Navigate to the register page upon successful login
-        },
-        onError: (err) => {
-          console.error('Login error:', err);
-        },
-      });
+      const success = await login();
+      if (success) {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error('Login failed:', error);
     }

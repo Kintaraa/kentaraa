@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,7 +37,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('Failed to logout:', error);
     }
@@ -93,30 +93,16 @@ const Header = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleConnectPlug}
-                  className={`px-4 py-2 rounded-full ${
-                    isPlugConnected
-                      ? 'bg-green-500 text-white'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
-                  } transition transform hover:scale-105`}
-                >
-                  {isPlugConnected ? 'Connected to Plug' : 'Connect to Plug'}
-                </button>
-                <Link
-                  to="/login"
-                  className="text-gray-700 hover:text-purple-600 transition-colors duration-200"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition transform hover:scale-105"
-                >
-                  Get Started
-                </Link>
-              </div>
+              <button
+                onClick={handleConnectPlug}
+                className={`px-4 py-2 rounded-full ${
+                  isPlugConnected
+                    ? 'bg-green-500 text-white'
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                } transition transform hover:scale-105`}
+              >
+                {isPlugConnected ? 'Connected to Plug' : 'Connect to Plug'}
+              </button>
             )}
           </nav>
 
@@ -169,21 +155,12 @@ const Header = () => {
               </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={handleConnectPlug}
-                className="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-              >
-                Connect to Plug
-              </button>
-              <Link
-                to="/register"
-                className="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Get Started
-              </Link>
-            </>
+            <button
+              onClick={handleConnectPlug}
+              className="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            >
+              Connect to Plug
+            </button>
           )}
         </div>
       </div>

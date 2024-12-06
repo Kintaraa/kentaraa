@@ -1,30 +1,47 @@
-// src/components/common/Header.jsx
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
-import { useAuth } from '../../contexts/AuthContext'
-
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [isPlugConnected, setIsPlugConnected] = useState(false);
 
   const navigation = [
     { name: 'Report', href: '/report' },
     { name: 'Support', href: '/support' },
     { name: 'Community', href: '/community' },
     { name: 'Resources', href: '/resources' },
-  ]
+  ];
 
+  // Handle Plug connection
+  const handleConnectPlug = async () => {
+    if (window.ic && window.ic.plug) {
+      try {
+        const isConnected = await window.ic.plug.requestConnect();
+        if (isConnected) {
+          console.log('Plug connected!');
+          setIsPlugConnected(true);
+        }
+      } catch (error) {
+        console.error('Failed to connect to Plug:', error);
+      }
+    } else {
+      console.error('Plug is not installed.');
+    }
+  };
+
+  // Handle Logout
   const handleLogout = async () => {
     try {
-      await logout()
-      navigate('/login')
+      await logout();
+      navigate('/login');
     } catch (error) {
-      console.error('Failed to logout:', error)
+      console.error('Failed to logout:', error);
     }
-  }
+  };
 
   return (
     <header className="fixed w-full z-50 bg-white/80 backdrop-blur-md shadow-lg">
@@ -33,15 +50,15 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-            <div className="flex items-center">
-            <img
-              src="/Kintara-Logo.png"
-              alt="Kintara Logo"
-              className="w-10 h-10 object-contain"
-            />
-              <span className="ml-2 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text">
-                Kintaraa
-              </span>
+              <div className="flex items-center">
+                <img
+                  src="/Kintara-Logo.png"
+                  alt="Kintara Logo"
+                  className="w-10 h-10 object-contain"
+                />
+                <span className="ml-2 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-transparent bg-clip-text">
+                  Kintaraa
+                </span>
               </div>
             </Link>
           </div>
@@ -77,6 +94,16 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleConnectPlug}
+                  className={`px-4 py-2 rounded-full ${
+                    isPlugConnected
+                      ? 'bg-green-500 text-white'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  } transition transform hover:scale-105`}
+                >
+                  {isPlugConnected ? 'Connected to Plug' : 'Connect to Plug'}
+                </button>
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-purple-600 transition-colors duration-200"
@@ -143,13 +170,12 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                onClick={() => setIsMenuOpen(false)}
+              <button
+                onClick={handleConnectPlug}
+                className="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50"
               >
-                Sign In
-              </Link>
+                Connect to Plug
+              </button>
               <Link
                 to="/register"
                 className="block px-3 py-2 rounded-md text-base font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50"
@@ -162,7 +188,7 @@ const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

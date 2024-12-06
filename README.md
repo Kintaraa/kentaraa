@@ -2,6 +2,13 @@
 
 Welcome to your new `kintaraa` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
 
+# Live Project
+You can view the live version of the kintsugi project on the Internet Computer mainnet at the following links:
+
+- Frontend Canister: https://24dyw-2yaaa-aaaam-adxmq-cai.icp0.io/
+
+- Backend Canister: Accessible through API calls or within the frontend.
+
 To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
 
 To learn more before you start working with `kintaraa`, see the following documentation available online:

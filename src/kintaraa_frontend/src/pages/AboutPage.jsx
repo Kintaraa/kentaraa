@@ -108,23 +108,36 @@ const AboutPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                name: 'Sarah Johnson',
-                role: 'Executive Director',
-                image: '/api/placeholder/150/150',
-                bio: 'With 15 years of experience in trauma support and advocacy.'
+                name: 'Stella Oiro',
+                role: 'CEO',
+                image: '/Stella.jpg',
+                bio: 'Stella Oiro is the CEO, bringing leadership and expertise in advocacy and support.'
               },
               {
-                name: 'Dr. Michael Chen',
-                role: 'Head of Mental Health',
-                image: '/api/placeholder/150/150',
-                bio: 'Specialized in trauma therapy and survivor support.'
+                name: 'Cheryl Owala',
+                role: 'CTO',
+                image: '/Cheryl.jpg',
+                bio: 'Cheryl Owala is the CTO, focused on survivor support and innovative solutions.'
               },
               {
-                name: 'Emily Rodriguez',
-                role: 'Community Director',
-                image: '/api/placeholder/150/150',
-                bio: 'Leading community engagement and support programs.'
-              }
+                name: 'Sheilla Fana',
+                role: 'CFO',
+                image: '/shfana.png',
+                bio: 'Sheilla Fana is the CFO, responsible for overseeing financial strategies and leading community engagement and support programs'
+              },
+              {
+                name: 'Raymond Madara',
+                role: 'Backend Engineer',
+                image: '/rcaleb.png',
+                bio: 'Raymond Madara is a Backend Engineer dedicated to driving community engagement and support initiatives.'
+              },
+              {
+                name: 'Vincent Omondi',
+                role: 'Full-Stack Engineer',
+                image: '/vin.png',
+                bio: 'Vincent Omondi is a Full-Stack Engineer passionate about leveraging his technical expertise to lead community engagement and support programs.'
+              },
+              
             ].map((member) => (
               <div key={member.name} className="bg-white rounded-lg shadow-lg p-6 text-center">
                 <img
@@ -149,9 +162,6 @@ const AboutPage = () => {
           <div className="flex justify-center space-x-4">
             <button className="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors">
               Get Involved
-            </button>
-            <button className="border border-purple-600 text-purple-600 px-6 py-3 rounded-md hover:bg-purple-50 transition-colors">
-              Support Our Work
             </button>
           </div>
         </div>

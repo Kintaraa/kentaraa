@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { api } from '../../services/api';
+import { AuthService } from '../../services/authService';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isPlugConnected, setIsPlugConnected] = useState(false);
+  const [balance, setBalance] = useState(null); // Add state for balance
 
   const navigation = [
     { name: 'Report', href: '/report' },
@@ -15,6 +18,19 @@ const Header = () => {
     { name: 'Community', href: '/community' },
     { name: 'Resources', href: '/resources' },
   ];
+
+  // Function to load token data after Plug wallet connects
+  const loadTokenData = async (principal) => {
+    try {
+      const [balanceData, txHistory] = await Promise.all([
+        api.getTokenBalance(principal),
+        api.getTransactionHistory(principal)
+      ]);
+      setBalance(balanceData.Ok); // Store balance
+    } catch (error) {
+      console.error('Error loading token data:', error);
+    }
+  };
 
   // Handle Plug connection
   const handleConnectPlug = async () => {
@@ -24,12 +40,17 @@ const Header = () => {
         if (isConnected) {
           console.log('Plug connected!');
           setIsPlugConnected(true);
+
+          // Fetch principal and load token data
+          const principal = await AuthService.getPrincipal();
+          loadTokenData(principal);
         }
       } catch (error) {
         console.error('Failed to connect to Plug:', error);
       }
     } else {
-      console.error('Plug is not installed.');
+      console.log('Plug wallet is not installed. Please install it to connect.');
+      alert('Plug wallet is not installed. Please install the Plug wallet extension.');
     }
   };
 
@@ -76,9 +97,15 @@ const Header = () => {
             ))}
             {user ? (
               <div className="flex items-center space-x-4">
-                <div className="token-glow px-4 py-2 rounded-full bg-white/80 flex items-center">
-                  <span className="text-purple-600 font-semibold">500 KINT</span>
-                </div>
+                {isPlugConnected && balance ? (
+                  <div className="token-glow px-4 py-2 rounded-full bg-white/80 flex items-center">
+                    <span className="text-purple-600 font-semibold">{balance.balance} KINT</span>
+                  </div>
+                ) : (
+                  <div className="px-4 py-2 rounded-full bg-white/80 text-gray-400">
+                    <span>Connect Wallet</span>
+                  </div>
+                )}
                 <Link
                   to={`/dashboard/${user.userType}`}
                   className="text-gray-700 hover:text-purple-600 transition-colors duration-200"

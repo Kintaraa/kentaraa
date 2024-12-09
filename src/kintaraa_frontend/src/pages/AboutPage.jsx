@@ -1,5 +1,6 @@
 // src/pages/AboutPage.jsx
 import { Shield, Users, Heart, Lock } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const AboutPage = () => {
   const values = [
@@ -160,9 +161,12 @@ const AboutPage = () => {
             Together, we can create a world where survivors feel supported, empowered, and heard.
           </p>
           <div className="flex justify-center space-x-4">
-            <button className="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors">
-              Get Involved
-            </button>
+          <Link 
+            to="/kintaraa-coins" 
+            className="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors"
+          >
+            Get Involved
+          </Link>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import KintaraaCoinsPage from './pages/KintaraaCoinsPage'
 
 // Pages & Layouts
 import HomePage from './pages/HomePage'
@@ -75,6 +76,7 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/support" element={<SupportPage />} />
+            <Route path="/kintaraa-coins" element={<KintaraaCoinsPage />} />
 
             {/* Protected dashboard routes */}
             <Route path="/dashboard">

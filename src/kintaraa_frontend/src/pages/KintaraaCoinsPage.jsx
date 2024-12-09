@@ -143,7 +143,7 @@ const KintaraaCoinsPage = () => {
             to="/register" 
             className="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-700 transition-colors inline-block"
           >
-            Create Account to Invest
+            Support A Survivor Today
           </Link>
         </div>
       </div>

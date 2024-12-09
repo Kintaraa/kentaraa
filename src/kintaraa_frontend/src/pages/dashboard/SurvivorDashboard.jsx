@@ -18,7 +18,7 @@ const SurvivorDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Message and Action Button */}
-      <div className="bg-white rounded-lg shadow p-6 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow p-20 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             Welcome Back, {user?.name || 'User'}

@@ -18,7 +18,7 @@ const IncidentReportPage = () => {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm p-20 mb-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-purple-100 rounded-lg">
             <Shield className="h-6 w-6 text-purple-600" />

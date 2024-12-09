@@ -92,7 +92,7 @@ const LegalDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Message */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-20">
         <h2 className="text-2xl font-bold text-gray-900">
           Welcome, Atty. {user?.name || 'Counselor'}
         </h2>

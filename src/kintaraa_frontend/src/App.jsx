@@ -2,7 +2,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
-import KintaraaCoinsPage from './pages/KintaraaCoinsPage'
 
 // Pages & Layouts
 import HomePage from './pages/HomePage'
@@ -21,6 +20,10 @@ import PrivacyPage from './pages/PrivacyPage'
 import TermsPage from './pages/TermsPage'
 import ReportPage from './pages/ReportPage'
 import SupportPage from './pages/SupportPage'
+import AnonymousReportPage from './pages/AnonymousReportPage'
+import KintaraaCoinsPage from './pages/KintaraaCoinsPage'
+
+
 
 
 // Components
@@ -77,6 +80,7 @@ function App() {
             <Route path="/report" element={<ReportPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/kintaraa-coins" element={<KintaraaCoinsPage />} />
+            <Route path="/anonymous-report" element={<AnonymousReportPage />} />
 
             {/* Protected dashboard routes */}
             <Route path="/dashboard">

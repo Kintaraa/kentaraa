@@ -36,44 +36,50 @@ const HomePage = () => {
       </nav>
 
 {/* Hero Section */}
-<div className="relative h-[80vh] pt-24 px-4">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('../../hero.jpg')",
-          }}
+<div className="relative min-h-screen">
+  {/* Background Image */}
+  <div 
+    className="absolute inset-0 z-0 bg-cover bg-no-repeat"
+    style={{
+      backgroundImage: "url('../../kintaraa.jpg')",
+      backgroundPosition: "center 40%",
+      filter: "brightness(1.2)"
+    }}
+  >
+    {/* Overlay for better text readability */}
+    <div className="absolute inset-0 bg-black/60"></div>
+  </div>
+  
+  {/* Content */}
+  <div className="relative z-10 flex flex-col justify-center items-center min-h-screen px-4 text-center">
+    <div className="max-w-7xl mx-auto">
+      <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+        <span className="block">Empowering Victims of</span>
+        <span className="block text-purple-300">Gender Based Violence</span>
+      </h1>
+      
+      <p className="mt-6 max-w-md mx-auto text-base text-gray-200 sm:text-lg md:text-xl md:max-w-3xl">
+        Transforming trauma into resilience through secure reporting and holistic professional support.
+        Your journey to healing starts here.
+      </p>
+      
+      <div className="mt-10 flex justify-center gap-4">
+        <Link
+          to="/register"
+          className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 md:text-lg transition duration-150 ease-in-out"
         >
-          {/* Optional overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/50"></div>
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto mt-16 text-center">
-          <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-            <span className="block">Empowering Victims of </span>
-            <span className="block text-purple-300">Gender Based Violence</span>
-          </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-200 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Transforming trauma into resilience through secure reporting and holistic professional support. 
-            Your journey to healing starts here.
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link
-              to="/register"
-              className="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 md:text-lg"
-            >
-              Get Started
-            </Link>
-            <Link
-              to="/about"
-              className="px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 md:text-lg"
-            >
-              Learn More
-            </Link>
-          </div>
-        </div>
+          Get Started
+        </Link>
+        <Link
+          to="/about"
+          className="px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 md:text-lg transition duration-150 ease-in-out"
+        >
+          Learn More
+        </Link>
       </div>
+    </div>
+  </div>
+</div>
 
       {/* Impact Analytics Section */}
       <div className="py-10 bg-gradient-to-br from-purple-900 to-pink-900 text-white">

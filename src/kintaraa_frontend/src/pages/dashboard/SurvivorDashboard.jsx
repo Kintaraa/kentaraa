@@ -18,10 +18,17 @@ const SurvivorDashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [tokenBalance, setTokenBalance] = useState(null)
+  const [userDetails, setUserDetails] = useState(null)
 
   useEffect(() => {
-    const loadTokenBalance = async () => {
+    const loadData = async () => {
       try {
+        // Get user details
+        const userData = AuthService.getUser();
+        console.log("user dateails: ",userData)
+        setUserDetails(userData);
+
+        // Get token balance
         const principal = await AuthService.getPrincipal();
         const result = await api.getTokenBalance(principal);
         console.log("Token balance: ", Number(result.Ok.balance));
@@ -55,10 +62,10 @@ const SurvivorDashboard = () => {
           }
         }
       } catch (error) {
-        console.error('Error loading token balance:', error);
+        console.error('Error loading data:', error);
       }
     };
-    loadTokenBalance()
+    loadData()
   }, [])
 
   const handleReportIncident = () => {
@@ -71,7 +78,7 @@ const SurvivorDashboard = () => {
       <div className="bg-white rounded-lg shadow p-20 flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Welcome Back, {user?.name || 'User'}
+            Welcome Back, {userDetails?.fullName || 'User'}
           </h2>
           <p className="mt-1 text-sm text-gray-500">
             Your safe space for support and healing

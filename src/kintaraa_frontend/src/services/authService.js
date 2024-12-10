@@ -123,4 +123,22 @@ export class AuthService {
   static isAuthenticated() {
     return !!this.identity;
   }
+  
+  static async setUser(userData) {
+    if (!this.identity) {
+      throw new Error('Not authenticated');
+    }
+    
+    // Store user data in localStorage for persistence
+    localStorage.setItem('user_data', JSON.stringify(userData));
+    this.userData = userData;
+    return true;
+  }
+  static getUser() {
+    if (!this.userData) {
+      const storedData = localStorage.getItem('user_data');
+      this.userData = storedData ? JSON.parse(storedData) : null;
+    }
+    return this.userData;
+  }
 }

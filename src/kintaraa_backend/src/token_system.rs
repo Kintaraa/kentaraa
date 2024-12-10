@@ -36,7 +36,7 @@ const COMMUNITY_POST_REWARD: u64 = 5;
 // Initialize new user with tokens
 #[update]
 pub async fn initialize_user_tokens() -> Result<u64, String> {
-    let user = ic_cdk::caller();
+    let user: Principal = ic_cdk::caller();
     
     TOKEN_BALANCES.with(|balances| {
         if balances.borrow().contains_key(&user) {

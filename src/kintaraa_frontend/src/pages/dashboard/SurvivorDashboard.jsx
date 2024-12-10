@@ -1,15 +1,65 @@
 // src/pages/dashboard/SurvivorDashboard.jsx
 import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+
+import { AuthService } from '../../services/authService'
+
+
+
 import { 
   FileText, Calendar, Users, Activity,
-  AlertCircle, Shield, Clock, PlusCircle
+  AlertCircle, Shield, Clock, PlusCircle,
+  Coins
 } from 'lucide-react'
-
+import { api } from '../../services/api'
 
 const SurvivorDashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [tokenBalance, setTokenBalance] = useState(null)
+
+  useEffect(() => {
+    const loadTokenBalance = async () => {
+      try {
+        const principal = await AuthService.getPrincipal();
+        const result = await api.getTokenBalance(principal);
+        console.log("Token balance: ", Number(result.Ok.balance));
+        
+        if (result.Ok) {
+          const tokenData = {
+            balance: Number(result.Ok.balance),
+            totalSpent: Number(result.Ok.total_spent),
+            lastUpdated: Number(result.Ok.last_updated),
+            totalEarned: Number(result.Ok.total_earned)
+          };
+          setTokenBalance(tokenData);
+        } else {
+          console.error('Error loading token balance:', result.Err);
+          // Try to initialize tokens if not found
+          try {
+            await api.initializeUserTokens();
+            // Fetch balance again after initialization
+            const newResult = await api.getTokenBalance(principal);
+            if (newResult.Ok) {
+              const tokenData = {
+                balance: Number(newResult.Ok.balance),
+                totalSpent: Number(newResult.Ok.total_spent), 
+                lastUpdated: Number(newResult.Ok.last_updated),
+                totalEarned: Number(newResult.Ok.total_earned)
+              };
+              setTokenBalance(tokenData);
+            }
+          } catch (initError) {
+            console.error('Error initializing tokens:', initError);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading token balance:', error);
+      }
+    };
+    loadTokenBalance()
+  }, [])
 
   const handleReportIncident = () => {
     navigate('/dashboard/survivor/report')
@@ -26,6 +76,12 @@ const SurvivorDashboard = () => {
           <p className="mt-1 text-sm text-gray-500">
             Your safe space for support and healing
           </p>
+          {tokenBalance && (
+            <div className="mt-2 flex items-center text-yellow-600">
+              <Coins className="h-5 w-5 mr-2" />
+              <span className="font-medium">{tokenBalance.balance} tokens available</span>
+            </div>
+          )}
         </div>
         <button
           onClick={handleReportIncident}

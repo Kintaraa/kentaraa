@@ -2,7 +2,8 @@ use crate::token_system::{TokenBalance, TokenTransaction};
 use candid::{CandidType, Principal};
 use ic_cdk::{query, update};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{cell::RefCell, collections::HashMap};
+use token_system::initialize_user_tokens;
 
 mod token_system;
 
@@ -82,6 +83,8 @@ thread_local! {
   static PROVIDERS: std::cell::RefCell<HashMap<Principal, Provider>> = std::cell::RefCell::new(HashMap::new());
   static ADMINS: std::cell::RefCell<Vec<Principal>> = std::cell::RefCell::new(Vec::new());
   static REPORTS: std::cell::RefCell<HashMap<u64, ReportRequest>> = std::cell::RefCell::new(HashMap::new());
+  static USERS: RefCell<HashMap<Principal, User>> = RefCell::new(HashMap::new());
+
 }
 #[derive(CandidType, Serialize, Deserialize, Clone)]
 pub struct ReportRequest {
@@ -387,6 +390,62 @@ pub fn submit_service_request(request: ServiceRequestInput) -> Result<u64, Strin
     });
 
     Ok(request_id)
+}
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub struct UserRegistration {
+    user_type: String,
+    full_name: String,
+    email: String,
+    license_number: Option<String>,
+    organization: Option<String>,
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone)]
+pub struct User {
+    id: Principal,
+    user_type: String,
+    full_name: String,
+    email: String,
+    license_number: Option<String>,
+    organization: Option<String>,
+    created_at: u64,
+}
+
+thread_local! {}
+
+#[ic_cdk_macros::update]
+pub async fn register_user(registration: UserRegistration) -> Result<Principal, String> {
+    let caller = ic_cdk::caller();
+
+    // Check if user already exists
+    if USERS.with(|users| users.borrow().contains_key(&caller)) {
+        return Err("User already registered".to_string());
+    }
+
+    // Create new user
+    let user = User {
+        id: caller,
+        user_type: registration.user_type,
+        full_name: registration.full_name,
+        email: registration.email,
+        license_number: registration.license_number,
+        organization: registration.organization,
+        created_at: ic_cdk::api::time(),
+    };
+
+    // Store user
+    USERS.with(|users| {
+        users.borrow_mut().insert(caller, user);
+    });
+
+    // Initialize tokens for new user
+    match initialize_user_tokens().await {
+        Ok(_) => Ok(caller),
+        Err(e) => Err(format!(
+            "User created but token initialization failed: {}",
+            e
+        )),
+    }
 }
 
 // Required for candid interface generation

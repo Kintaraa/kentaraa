@@ -39,10 +39,10 @@ export class AuthService {
     
     return new Promise((resolve) => {
       this.client.login({
-        // identityProvider: process.env.DFX_NETWORK === "ic" 
-        //   ? IDENTITY_PROVIDER
-        //   : LOCAL_II,
-        identityProvider: "https://identity.ic0.app",
+        identityProvider: process.env.DFX_NETWORK === "ic" 
+          ? IDENTITY_PROVIDER
+          : LOCAL_II,
+        // identityProvider: "https://identity.ic0.app",
         onSuccess: async () => {
           this.identity = await this.client.getIdentity();
           // Cache authentication data
@@ -51,7 +51,12 @@ export class AuthService {
           localStorage.setItem('auth_identity', JSON.stringify(this.identity));
           console.log("=====Checking if user is admin=====", principal.toString())
 
-
+          // Initialize tokens for new users
+          try {
+            await api.initializeUserTokens();
+          } catch (error) {
+            console.log("Token initialization error (might be already initialized):", error);
+          }
           // Check if user is admin
           const isAdmin = await AuthService.checkIsAdmin(principal);
           console.log("=====User is admin=====", isAdmin)

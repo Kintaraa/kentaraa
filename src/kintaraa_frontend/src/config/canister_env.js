@@ -10,6 +10,6 @@ export const canisterId = {
   };
   
   export function getCanisterId(name) {
-    const network = process.env.DFX_NETWORK || 'local';
+    const network = process.env.DFX_NETWORK || 'ic';
     return canisterId[network][name];
   }

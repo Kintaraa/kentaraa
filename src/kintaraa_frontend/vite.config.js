@@ -7,7 +7,33 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'configure-response-headers',
+        configureServer: (server) => {
+          server.middlewares.use((_req, res, next) => {
+            res.setHeader('Content-Security-Policy', `
+              default-src 'self';
+              connect-src 'self' 
+                https://ic0.app
+                https://*.ic0.app
+                https://*.icp0.io
+                https://*.raw.ic0.app
+                https://icp0.io
+                https://*.dfinity.network
+                http://localhost:*
+                http://127.0.0.1:*;
+              img-src 'self' data: blob:;
+              script-src 'self' 'unsafe-eval';
+              style-src 'self' 'unsafe-inline';
+              frame-src 'self';
+            `.replace(/\s+/g, ' ').trim());
+            next();
+          });
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

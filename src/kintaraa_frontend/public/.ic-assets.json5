@@ -1,10 +1,10 @@
 [
-    {
-        "match": "**/*",
-        "headers": {
-            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self' http://localhost:* http://127.0.0.1:4943 https://icp0.io https://*.icp0.io; img-src 'self' data:; style-src * 'unsafe-inline'; style-src-elem * 'unsafe-inline'; font-src *; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
-            "Referrer-Policy": "same-origin",
-            "X-Frame-Options": "DENY"
-        }
-    }
+  {
+    match: "**/*",
+    headers: {
+      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self' http://localhost:* https://24dyw-2yaaa-aaaam-adxmq-cai.icp0.io/ http://127.0.0.1:4943 https://icp0.io https://*.icp0.io; img-src 'self' data:; style-src * 'unsafe-inline'; style-src-elem * 'unsafe-inline'; font-src *; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+      "Referrer-Policy": "same-origin",
+      "X-Frame-Options": "DENY",
+    },
+  },
 ]

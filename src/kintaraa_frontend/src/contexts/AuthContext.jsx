@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthService } from '../services/authService';
 
-const network = import.meta.env.VITE_DFX_NETWORK;
+const network = import.meta.env.VITE_DFX_NETWORK || "ic";
 console.log('Environment Using Import:', network);
 
 const AuthContext = createContext(null);

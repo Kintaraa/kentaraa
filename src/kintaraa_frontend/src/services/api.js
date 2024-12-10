@@ -5,19 +5,25 @@ import { AuthClient } from "@dfinity/auth-client";
 
 let backendActor = null;
 
-export const getBackendActor = async () => {
+export const getBackendActor = async () => {  // Add export here
   if (!backendActor) {
     const authClient = await AuthClient.create();
     const identity = await authClient.getIdentity();
     const canisterId = getCanisterId("kintaraa_backend");
+    
+    console.log('Network:', process.env.DFX_NETWORK);
     console.log('Using canister ID:', canisterId);
+    
+    const isLocal = !process.env.DFX_NETWORK || process.env.DFX_NETWORK === 'local';
+    const host = isLocal ? 'http://127.0.0.1:4943' : 'https://ic0.app';
     
     const agent = new HttpAgent({
       identity,
-      host: process.env.DFX_NETWORK === "ic" ? "https://ic0.app" : "http://127.0.0.1:4943",
+      host,
+      verifyQuerySignatures: false
     });
 
-    if (process.env.DFX_NETWORK !== "ic") {
+    if (isLocal) {
       await agent.fetchRootKey().catch(console.error);
     }
 
@@ -111,4 +117,22 @@ export const api = {
       throw error;
     }
   }
+  ,
+  registerUser: async (userData) => {
+    try {
+      const actor = await getBackendActor();
+      const registrationData = {
+        user_type: userData.userType,
+        full_name: userData.fullName,
+        email: userData.email,
+        license_number: userData.licenseNumber || "", // Optional field
+        organization: userData.organization || "", // Optional field
+      };
+      return await actor.register_user(registrationData);
+    } catch (error) {
+      console.error("Error registering user:", error);
+      throw error;
+    }
+  },
+
 };

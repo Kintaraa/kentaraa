@@ -53,4 +53,11 @@ service : {
         notes: text;
         location: text;
     }) -> (variant { Ok: nat64; Err: text });
+    "register_user": (record {
+        user_type: text;
+        full_name: text;
+        email: text;
+        license_number: opt text;
+        organization: opt text;
+    }) -> (variant { Ok: principal; Err: text });
 }

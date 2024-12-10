@@ -1,10 +1,12 @@
 // src/pages/auth/RegisterPage.jsx
-import { useState } from 'react'
+import { useState ,useEffect} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import toast from 'react-hot-toast'
+import { api } from '../../services/api'
+import { AuthService } from '../../services/authService'
 
 // Form validation schema
 const registerSchema = z.object({
@@ -60,13 +62,30 @@ const Register = () => {
     setError(null)
 
     try {
-      // Simulate API call
-      console.log('Registration data:', data)
-      setSuccess(true)
-      toast.success('Registration successful!')
-      navigate(`/dashboard/${data.userType}`)
+      // Call register API
+      const result = await api.registerUser({
+        userType: data.userType,
+        fullName: data.fullName,
+        email: data.email,
+        licenseNumber: data.licenseNumber ? [data.licenseNumber] : [],
+        organization: data.organization ? [data.organization] : []
+      });
+
+
+      if (result) {
+        setSuccess(true)
+        toast.success('Registration successful!')
+        
+        // Login after successful registration
+        const loginSuccess = await AuthService.login()
+        if (loginSuccess) {
+          navigate(`/dashboard/${data.userType}`)
+        } else {
+          navigate('/login')
+        }
+      }
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Registration failed')
       toast.error('Registration failed. Please try again.')
     } finally {
       setIsLoading(false)

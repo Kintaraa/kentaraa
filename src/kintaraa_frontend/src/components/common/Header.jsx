@@ -11,6 +11,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [isPlugConnected, setIsPlugConnected] = useState(false);
   const [balance, setBalance] = useState(null); // Add state for balance
+  const [userDetails, setUserDetails] = useState(null);
 
   const navigation = [
     { name: 'Report', href: '/report' },
@@ -18,6 +19,21 @@ const Header = () => {
     { name: 'Community', href: '/community' },
     { name: 'Resources', href: '/resources' },
   ];
+
+  useEffect(() => {
+    const loadUserDetails = async () => {
+      try {
+        const userData = AuthService.getUser();
+        setUserDetails(userData);
+      } catch (error) {
+        console.error('Error loading user details:', error);
+      }
+    };
+    
+    if (user) {
+      loadUserDetails();
+    }
+  }, [user]);
 
   // Function to load token data after Plug wallet connects
   const loadTokenData = async (principal) => {
@@ -107,7 +123,7 @@ const Header = () => {
                   </div>
                 )}
                 <Link
-                  to={`/dashboard/${user.userType}`}
+                  to={`/dashboard/${userDetails?.userType || user.userType}`}
                   className="text-gray-700 hover:text-purple-600 transition-colors duration-200"
                 >
                   Dashboard
@@ -162,10 +178,10 @@ const Header = () => {
               {item.name}
             </Link>
           ))}
-          {user ? (
+          {userDetails ? (
             <>
               <Link
-                to={`/dashboard/${user.userType}`}
+                to={`/dashboard/${userDetails?.userType || user.userType}`}
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50"
                 onClick={() => setIsMenuOpen(false)}
               >

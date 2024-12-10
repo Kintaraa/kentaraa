@@ -71,7 +71,6 @@ const Register = () => {
         organization: data.organization ? [data.organization] : []
       });
 
-
       if (result) {
         setSuccess(true)
         toast.success('Registration successful!')
@@ -79,6 +78,14 @@ const Register = () => {
         // Login after successful registration
         const loginSuccess = await AuthService.login()
         if (loginSuccess) {
+          // Set user with userType after successful login
+          await AuthService.setUser({
+            userType: data.userType,
+            fullName: data.fullName,
+            email: data.email,
+            licenseNumber: data.licenseNumber || null,
+            organization: data.organization || null
+          });
           navigate(`/dashboard/${data.userType}`)
         } else {
           navigate('/login')

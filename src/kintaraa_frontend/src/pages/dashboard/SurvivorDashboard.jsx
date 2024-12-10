@@ -110,12 +110,6 @@ const SurvivorDashboard = () => {
             <div className="mt-2 text-sm text-red-700">
               <p>If you're in immediate danger, please call emergency services or click the emergency button below.</p>
             </div>
-            <div className="mt-4">
-              <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                <AlertCircle className="h-5 w-5 mr-2" />
-                Emergency Help
-              </button>
-            </div>
           </div>
         </div>
       </div>

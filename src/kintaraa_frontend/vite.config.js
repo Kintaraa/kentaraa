@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
               img-src 'self' data: blob:;
               script-src 'self' 'unsafe-eval';
               style-src 'self' 'unsafe-inline';
-              frame-src 'self';
+              frame-src 'self' https://identity.ic0.app;
             `.replace(/\s+/g, ' ').trim());
             next();
           });

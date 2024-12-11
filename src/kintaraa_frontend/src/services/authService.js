@@ -39,9 +39,10 @@ export class AuthService {
     
     return new Promise((resolve) => {
       this.client.login({
-        identityProvider: process.env.DFX_NETWORK === "ic" 
-          ? IDENTITY_PROVIDER
-          : LOCAL_II,
+        // identityProvider: process.env.DFX_NETWORK === "ic" 
+        //   ? IDENTITY_PROVIDER
+        //   : LOCAL_II,
+          Identity: "https://ic0.app",
         onSuccess: async () => {
           this.identity = await this.client.getIdentity();
           // Cache authentication data

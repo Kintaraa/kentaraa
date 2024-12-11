@@ -42,7 +42,6 @@ export class AuthService {
         identityProvider: process.env.DFX_NETWORK === "ic" 
           ? IDENTITY_PROVIDER
           : LOCAL_II,
-        // identityProvider: "https://identity.ic0.app",
         onSuccess: async () => {
           this.identity = await this.client.getIdentity();
           // Cache authentication data

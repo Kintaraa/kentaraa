@@ -24,12 +24,15 @@
         "internet_identity"
       ],
       "frontend": {
-        "entrypoint": "src/kintaraa_frontend/index.html"
+        "entrypoint": "src/kintaraa_frontend/src/index.html"
       },
       "source": [
         "src/kintaraa_frontend/dist"
       ],
-      "type": "assets"
+      "type": "assets",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self'; connect-src 'self' https://ic0.app https://*.ic0.app https://*.icp0.io https://*.raw.ic0.app https://icp0.io https://*.dfinity.network http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src 'self' https://identity.ic0.app;"
+      }
     }
   },
   "networks": {

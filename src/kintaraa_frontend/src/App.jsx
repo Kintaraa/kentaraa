@@ -2,6 +2,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import KintaraaCoinsPage from './pages/KintaraaCoinsPage'
 
 // Pages & Layouts
 import HomePage from './pages/HomePage'
@@ -20,6 +21,8 @@ import PrivacyPage from './pages/PrivacyPage'
 import TermsPage from './pages/TermsPage'
 import ReportPage from './pages/ReportPage'
 import SupportPage from './pages/SupportPage'
+import PoliceDashboard from './pages/dashboard/PoliceDashboard'
+import CHVDashboard from './pages/dashboard/CHVDashboard'
 
 
 // Components
@@ -61,6 +64,7 @@ function App() {
         <main className="flex-grow">
           <Routes>
             {/* Public routes */}
+            <Route path="/kintaraa-coins" element={<KintaraaCoinsPage />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={
@@ -75,6 +79,7 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/support" element={<SupportPage />} />
+          
 
             {/* Protected dashboard routes */}
             <Route path="/dashboard">
@@ -135,6 +140,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="police"
+                element={
+                  <ProtectedRoute>
+                    <PoliceDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="chv"
+                element={
+                  <ProtectedRoute>
+                    <CHVDashboard />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* 404 Route */}
@@ -158,7 +179,7 @@ function App() {
 
         {/* Emergency Button - Always visible */}
         <EmergencyButton />
-
+      
         {/* Footer */}
         <Footer />
       </div>

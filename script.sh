@@ -162,8 +162,7 @@ main() {
     start_and_deploy
 
     print_success "Setup completed successfully!"
-    print_status "You can now start the development server with: npm start"
-    print_status "Access the application at: http://localhost:8080"
+
 }
 
 # Run main function

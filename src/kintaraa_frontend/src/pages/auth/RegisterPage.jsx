@@ -10,7 +10,7 @@ import { AuthService } from '../../services/authService'
 
 // Form validation schema
 const registerSchema = z.object({
-  userType: z.enum(['survivor', 'medical', 'legal', 'counselor'], {
+  userType: z.enum(['survivor', 'medical', 'legal', 'counselor', 'police', 'chv'], {
     required_error: "Please select a user type"
   }),
   fullName: z.string()
@@ -140,6 +140,8 @@ const Register = () => {
               <option value="medical">Medical Professional</option>
               <option value="legal">Legal Counsel</option>
               <option value="counselor">Psychological Counselor</option>
+              <option value="police">Police</option>
+              <option value="chv">Community Health Volunteer</option>
             </select>
           </div>
 

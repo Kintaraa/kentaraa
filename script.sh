@@ -56,6 +56,7 @@ install_rust() {
     fi
 }
 
+
 # Install Node.js using nvm
 install_node() {
     print_status "Checking Node.js installation..."
@@ -79,27 +80,12 @@ install_node() {
         print_success "nvm is already installed"
     fi
 
-    # Install latest LTS version of Node.js
-    if ! command_exists node; then
-        print_status "Installing latest LTS version of Node.js..."
-        nvm install --lts
-        nvm use --lts
-        print_success "Node.js LTS installed successfully"
-    else
-        # Check if current version is LTS
-        CURRENT_VERSION=$(node -v)
-        LATEST_LTS=$(nvm version-remote --lts)
-        
-        if [ "$CURRENT_VERSION" != "$LATEST_LTS" ]; then
-            print_status "Updating Node.js to latest LTS version..."
-            nvm install --lts
-            nvm use --lts
-            print_success "Node.js updated to latest LTS version"
-        else
-            print_success "Node.js is already at latest LTS version"
-        fi
-    fi
-
+    # Install Node.js 18 LTS
+    print_status "Installing Node.js v18 LTS..."
+    nvm install 18
+    nvm use 18
+    nvm alias default 18
+    
     # Verify installations
     print_status "Node.js version: $(node -v)"
     print_status "npm version: $(npm -v)"
